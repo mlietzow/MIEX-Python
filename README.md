@@ -11,9 +11,21 @@ is a Mie scattering code for large grains for Python.
 
 run_miex.py executes miex with the parameters of the input file:
 
-```python
+```bash
 python3 run_miex.py example1.input
 python3 run_miex.py example2.input
+```
+
+
+### Run miex via streamlit
+
+miex can be used in a simple Streamlit web app. Install streamlit
+```bash
+pip3 install streamlit
+```
+and start the web app:
+```bash
+streamlit run miex_app.py
 ```
 
 
@@ -21,7 +33,7 @@ python3 run_miex.py example2.input
 
 miex.py can be imported and used in any python script (see example script):
 
-```python
+```bash
 python3 miex_example.py
 ```
 
@@ -30,6 +42,6 @@ python3 miex_example.py
 
 test_miex.py includes some test routines. The results are compared with results by [Bohren & Huffman (1998)](https://doi.org/10.1002/9783527618156) and by [Wiscombe (1979)](https://doi.org/10.5065/D6ZP4414):
 
-```python
+```bash
 python3 test_miex.py
 ```
