@@ -1,4 +1,6 @@
 import numpy as np
+from numba import njit
+
 
 # ****************************************************************************************************
 # MIEX: MIE SCATTERING CODE FOR LARGE GRAINS (https://doi.org/10.1016/j.cpc.2004.06.070)
@@ -40,8 +42,11 @@ import numpy as np
 #
 # ====================================================================================================
 
-def aa2(ax: float, ri: complex, num: int):
+
+@njit(cache=True)
+def aa2(ax, ri, num, ru):
     ''' Calculations of the ratio of derivative to the function for Bessel functions of half order with complex argument: J'(n)/J(n).
+        The calculations are given by the recursive expression 'from top to bottom' beginning from n=num.
         This routine is based on the routine 'aa' published by
         N.V.Voshchinnikov: 'Optics of Cosmic Dust', Astrophysics and Space Physics Review 12, 1 (2002)
 
@@ -56,22 +61,19 @@ def aa2(ax: float, ri: complex, num: int):
         num : int
             number for subroutine
 
-        Returns
-        -------
-        ru : list of complex floats
+        ru : complex array like
+            ru-array of results
     '''
 
-    ru = np.zeros(num, dtype=complex)
     s = ax / ri
     ru[num-1] = (num + 1.0) * s
 
     for i in range(num-1, 0, -1):
         ru[i-1] = (i + 1.0) * s - 1.0 / (ru[i] + (i + 1.0) * s)
 
-    return ru
 
-
-def shexqnn2(x: float, ri: complex, nang: int = 1, doSA: bool = False):
+@njit(cache=True)
+def shexqnn2(x, ri, nang=1, doSA=False):
     ''' Derive quantities for a single size parameter and chemical composition.
         This routine is based on the routine 'shexqnn' published by
         N.V.Voshchinnikov: 'Optics of Cosmic Dust', Astrophysics and Space Physics Review 12, 1 (2002)
@@ -160,7 +162,8 @@ def shexqnn2(x: float, ri: complex, nang: int = 1, doSA: bool = False):
         raise Exception(f'Maximum number of terms: {nterm}, number of terms required: {num}, increase default value of the variable \'nterm\'')
     
     # Logarithmic derivative to Bessel function (complex argument)
-    ru = aa2(ax, ri, num)
+    ru = np.zeros(num, dtype=np.complex128)
+    aa2(ax, ri, num, ru)
 
     # ------------------------------------------------------------------------------------------
     # FIRST TERM
@@ -169,19 +172,19 @@ def shexqnn2(x: float, ri: complex, nang: int = 1, doSA: bool = False):
     iterm = 1
 
     # Bessel functions
-    ass = np.sqrt( np.pi / 2.0 * ax )
+    ass = 1.0 / np.sqrt( 0.5 * np.pi * ax )
     w1 = 2.0 / np.pi * ax
-    Si = np.sin(x) / x
-    Co = np.cos(x) / x
+    Si = np.sin(x) * ax
+    Co = np.cos(x) * ax
 
     # n = 0
-    besJ0 = Si / ass
-    besY0 = -Co / ass
+    besJ0 = Si * ass
+    besY0 = -Co * ass
     iu0 = 0
 
     # n = 1
-    besJ1 = ( Si * ax - Co) / ass
-    besY1 = (-Co * ax - Si) / ass
+    besJ1 = ( Si * ax - Co) * ass
+    besY1 = (-Co * ax - Si) * ass
     iu1 = 0
     iu2 = 0
 
@@ -203,8 +206,8 @@ def shexqnn2(x: float, ri: complex, nang: int = 1, doSA: bool = False):
 
     # scattering amplitude functions
     nang2 = 2 * nang - 1
-    SA_1 = np.zeros(nang2, dtype=complex)
-    SA_2 = np.zeros(nang2, dtype=complex)
+    SA_1 = np.zeros(nang2, dtype=np.complex128)
+    SA_2 = np.zeros(nang2, dtype=np.complex128)
     if doSA:
         mu = np.cos(np.linspace(0, np.pi, nang2))
         fpi0 = np.zeros(nang2)
@@ -222,14 +225,15 @@ def shexqnn2(x: float, ri: complex, nang: int = 1, doSA: bool = False):
         fpi0 = fpi1_tmp
 
     # start value for the next terms
-    iterm += 1
+    # iterm += 1
 
     # ------------------------------------------------------------------------------------------
     # 2., 3., ... num
     # ------------------------------------------------------------------------------------------
     z = -1.0
 
-    while True:
+    # while True:
+    for iterm in range(2, num + 1):
         an = an + 2.0
         an2 = an - 2.0
 
@@ -301,14 +305,14 @@ def shexqnn2(x: float, ri: complex, nang: int = 1, doSA: bool = False):
             fpi1 = fpi1 - fpi0 * (1.0 + 1.0 / iterm)
             fpi0 = fpi1_tmp
 
-        iterm += 1
+        # iterm += 1
 
-        if iterm == num:
-            break
+        # if iterm == num:
+        #     break
 
     # efficiency factors (final calculations)
-    Q_ext = b * Q_ext
-    Q_sca = b * Q_sca
+    Q_ext *= b
+    Q_sca *= b
     Q_bk = 2.0 * b * np.abs(r)**2
     Q_pr = Q_ext - 2.0 * b * np.real(ss)
     Q_abs = Q_ext - Q_sca
@@ -316,6 +320,7 @@ def shexqnn2(x: float, ri: complex, nang: int = 1, doSA: bool = False):
     g_sca = (Q_ext - Q_pr) / Q_sca
 
     return Q_ext, Q_abs, Q_sca, Q_bk, Q_pr, albedo, g_sca, SA_1, SA_2
+
 
 def scattering_matrix_elements(SA_1, SA_2):
     ''' Calculations of the scattering matrix elements

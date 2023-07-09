@@ -44,9 +44,11 @@ import time
 #
 # ====================================================================================================
 
+
 def conv(line):
     # Converter for lambda/n/k database files
     return line.replace(b'D', b'e')
+
 
 def main(input_filename):
     #---------------------------------------------------------------------------------------------------
@@ -331,6 +333,7 @@ def main(input_filename):
             output_file.write('# not calculated.\n')
 
     print('    ... done.')
+
 
 if __name__ == '__main__':
     if len(sys.argv) == 1:

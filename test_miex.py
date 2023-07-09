@@ -15,7 +15,7 @@ class test_miex(unittest.TestCase):
     '''
 
     def test_bh(self):
-        ri = 1.55 + 0j
+        ri = complex(1.55, 0)
         lambda0 = 0.6328
         radius = 0.525
         x = 2.0 * np.pi * radius / lambda0
@@ -60,7 +60,7 @@ class test_miex(unittest.TestCase):
             self.assertAlmostEqual(i, j, msg='incorrect S_34', delta=0.000001)
 
     def test_w_1(self):
-        ri = 1.5 + 0j
+        ri = complex(1.5, 0)
         x = 10.0
 
         result = miex.shexqnn2(x=x, ri=ri)
@@ -73,7 +73,7 @@ class test_miex(unittest.TestCase):
         # TODO: compare intensity and degree of polarization
 
     def test_w_2(self):
-        ri = 1.5 + 0j
+        ri = complex(1.5, 0)
         x = 100.0
 
         result = miex.shexqnn2(x=x, ri=ri)
@@ -86,7 +86,7 @@ class test_miex(unittest.TestCase):
         # TODO: compare intensity and degree of polarization
 
     def test_w_3(self):
-        ri = 1.5 + 0j
+        ri = complex(1.5, 0)
         x = 1000.0
 
         result = miex.shexqnn2(x=x, ri=ri)
@@ -99,7 +99,7 @@ class test_miex(unittest.TestCase):
         # TODO: compare intensity and degree of polarization
 
     def test_w_4(self):
-        ri = 1.5 + 0j
+        ri = complex(1.5, 0)
         x = 5000.0
 
         result = miex.shexqnn2(x=x, ri=ri)
@@ -112,7 +112,7 @@ class test_miex(unittest.TestCase):
         # TODO: compare intensity and degree of polarization
     
     def test_w_5(self):
-        ri = 1.5 + 0.1j
+        ri = complex(1.5, 0.1)
         x = 10.0
 
         result = miex.shexqnn2(x=x, ri=ri)
@@ -125,7 +125,7 @@ class test_miex(unittest.TestCase):
         # TODO: compare intensity and degree of polarization
 
     def test_w_6(self):
-        ri = 1.5 + 0.1j
+        ri = complex(1.5, 0.1)
         x = 100.0
 
         result = miex.shexqnn2(x=x, ri=ri)
@@ -138,7 +138,7 @@ class test_miex(unittest.TestCase):
         # TODO: compare intensity and degree of polarization
 
     def test_w_7(self):
-        ri = 1.5 + 0.1j
+        ri = complex(1.5, 0.1)
         x = 1000.0
 
         result = miex.shexqnn2(x=x, ri=ri)
@@ -151,7 +151,7 @@ class test_miex(unittest.TestCase):
         # TODO: compare intensity and degree of polarization
     
     def test_w_8(self):
-        ri = 1.5 + 0.1j
+        ri = complex(1.5, 0.1)
         x = 5000.0
 
         result = miex.shexqnn2(x=x, ri=ri)
