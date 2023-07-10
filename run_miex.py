@@ -162,7 +162,7 @@ def main(input_filename):
     S33 = np.zeros((nang2, nlam))
     S34 = np.zeros((nang2, nlam))
     
-    print('<i> Calculation started ...')
+    print(' >> Calculation started ...')
 
     # read lambda/n/k database
     for icomp in range(ncomp):
@@ -392,7 +392,7 @@ def main(input_filename):
         # 12. Scattering Matrix elements S11, S12, S33, and S34
         if doSA:
             # S11
-            with open('results/' + fresult + '.S11', 'w'):
+            with open('results/' + fresult + '.S11', 'w') as output_file:
                 for ilam in range(nlam):
                     output_file.write(f'{wavelength[ilam]}\n')
                     for iang in range(nang2):
@@ -401,7 +401,7 @@ def main(input_filename):
                         output_file.write(f'{angx} {S11[iang,ilam]}\n')
 
             # S12
-            with open('results/' + fresult + '.S12', 'w'):
+            with open('results/' + fresult + '.S12', 'w') as output_file:
                 for ilam in range(nlam):
                     output_file.write(f'{wavelength[ilam]}\n')
                     for iang in range(nang2):
@@ -410,7 +410,7 @@ def main(input_filename):
                         output_file.write(f'{angx} {S11[iang,ilam]}\n')
 
             # S33
-            with open('results/' + fresult + '.S33', 'w'):
+            with open('results/' + fresult + '.S33', 'w') as output_file:
                 for ilam in range(nlam):
                     output_file.write(f'{wavelength[ilam]}\n')
                     for iang in range(nang2):
@@ -419,7 +419,7 @@ def main(input_filename):
                         output_file.write(f'{angx} {S11[iang,ilam]}\n')
 
             # S34
-            with open('results/' + fresult + '.S34', 'w'):
+            with open('results/' + fresult + '.S34', 'w') as output_file:
                 for ilam in range(nlam):
                     output_file.write(f'{wavelength[ilam]}\n')
                     for iang in range(nang2):
