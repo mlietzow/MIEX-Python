@@ -1,7 +1,13 @@
 import miex
 import numpy as np
 import matplotlib.pyplot as plt
+import pandas as pd
 import streamlit as st
+
+
+# Converter for lambda/n/k database files
+def conv(line):
+    return line.replace(b'D', b'e')
 
 
 st.set_page_config(page_title='MIEX', page_icon=None, layout="wide")
@@ -10,128 +16,250 @@ st.text('MIEX is a Mie scattering code for large grains')
 
 st.divider()
 
-col1, col2 = st.columns(2)
-with col1:
-    ri_real = st.number_input('Real part of refractive index:', value=1.50, format='%f', step=0.01, min_value=1.0)
-with col2:
-    ri_imag = st.number_input('Imaginary part of refractive index:', value=0.0, format='%f', step=0.01, min_value=0.0)
+radio_wavelength = st.radio(
+    'Single wavelength or upload a dust data files (three columns: wavelength/micron real imag):',
+    options=['single', 'upload'], horizontal=True)
 
-wavelength = st.number_input(r'Wavelength $\lambda$ / m:', value=1e-6, format='%e', step=1e-6)
+if radio_wavelength == 'single':
+    col1, col2 = st.columns(2)
+    with col1:
+        ri_real = np.array([st.number_input('Real part of refractive index:', value=1.50, format='%f', step=0.01, min_value=1.0)])
+    with col2:
+        ri_imag = np.array([st.number_input('Imaginary part of refractive index:', value=0.0, format='%f', step=0.01, min_value=0.0)])
+
+    wavelength = np.array([st.number_input(r'Wavelength $\lambda$ [micron]:', value=1.0, format='%f', step=0.1)])
+    nlam = 1
+else:
+    uploaded_file = st.file_uploader('Choose a file')
+    if uploaded_file is not None:
+        wavelength, ri_real, ri_imag = np.loadtxt(uploaded_file, unpack=True, comments='#', converters=conv)
+    else:
+        wavelength = np.array([1.0])
+    nlam = len(wavelength)
 
 st.divider()
 
-radio_button = st.radio(
+radio_grain = st.radio(
     'Single grain size or grain size distribution $n(r) \propto n^q$:',
     options=['single', 'distribution'], horizontal=True)
 
-if radio_button == 'single':
-    particle_size = st.number_input(r'Grain size $r$ / m:', value=1e-6, format='%e', step=1e-6)
-    size_parameter = 2.0 * np.pi * particle_size / wavelength
-    st.write(r'Size parameter $x = 2 \pi r / \lambda = $', size_parameter)
+if radio_grain == 'single':
+    radmin = st.number_input(r'Grain radius $r$ [micron]:', value=1.0, format='%f', step=0.1)
+
+    radmax = radmin
+    exponent = 0.0
+    nrad = 1
 else:
     col1, col2 = st.columns(2)
     with col1:
-        particle_size_min = st.number_input(r'Minimum grain size $r_{\rm min}$ / m:', value=1e-7, format='%e', step=1e-6)
-        size_parameter_min = 2.0 * np.pi * particle_size_min / wavelength
-        st.write(r'Minimum size parameter $x_{\rm min} = 2 \pi r_{\rm min} / \lambda = $', size_parameter_min)
+        radmin = st.number_input(r'Minimum grain size $r_{\rm min}$ [micron]:', value=0.01, format='%f', step=0.1)
+        exponent = st.number_input(r'Size distribtion Exponent $q$', value=-3.5, format='%f', step=0.1)
     with col2:
-        particle_size_max = st.number_input(r'Maximum grain size $r_{\rm max}$ / m:', value=1e-5, format='%e', step=1e-6)
-        size_parameter_max = 2.0 * np.pi * particle_size_max / wavelength
-        st.write(r'Maximum size parameter $x_{\rm max} = 2 \pi r_{\rm max} / \lambda = $', size_parameter_max)
-    
-    exponent = st.number_input(r'Size distribtion Exponent $q$', value=-3.5, format='%f', step=0.1)
-    nsize = st.number_input(r'Number of size bins:', value=100, format='%d', step=1, min_value=1)
-
-    size_parameter = np.geomspace(size_parameter_min, size_parameter_max, nsize)
-    size_distribution = size_parameter**exponent
+        radmax = st.number_input(r'Maximum grain size $r_{\rm max}$ [micron]:', value=1.0, format='%f', step=0.1)
+        nrad = st.number_input(r'Number of size bins:', value=100, format='%d', step=1, min_value=1)
 
 st.divider()
 
-doSA = st.checkbox('Calculate scattering matrix elements', value=False)
-nang = st.number_input(
-    r'Half number of scattering angles in the intervall $0$ to $\pi/2$ (equidistantly distributed):',
-    value=91, format='%d', step=1, min_value=1, disabled=not doSA)
+col1, col2 = st.columns(2)
+with col1:
+    doSA = st.checkbox('Calculate scattering matrix elements', value=False)
+with col2:
+    nang = st.number_input(
+        r'Half number of scattering angles in the intervall $0$ to $\pi/2$ (equidistantly distributed):',
+        value=91, format='%d', step=1, min_value=1, disabled=not doSA)
 
 st.divider()
 
 if st.button('Run'):
+    q_ext = np.zeros(nlam)
+    q_sca = np.zeros(nlam)
+    q_abs = np.zeros(nlam)
+    q_bk = np.zeros(nlam)
+    # q_pr = np.zeros(nlam)
+
+    c_ext = np.zeros(nlam)
+    c_sca = np.zeros(nlam)
+    c_abs = np.zeros(nlam)
+    c_bk = np.zeros(nlam)
+    # c_pr = np.zeros(nlam)
+
+    albedo = np.zeros(nlam)
+    g_sca = np.zeros(nlam)
+
     nang2 = 2 * nang - 1
-    ri = complex(ri_real, ri_imag)
-    if radio_button == 'single':
-        result = miex.shexqnn2(size_parameter, ri, nang, doSA)
-        matrix = miex.scattering_matrix_elements(result[7], result[8])
-        st.write(r'$Q_{\rm ext} =$', result[0])
-        st.write(r'$Q_{\rm abs} =$', result[1])
-        st.write(r'$Q_{\rm sca} =$', result[2])
-        st.write(r'$Q_{\rm bk} =$', result[3])
-        st.write(r'$Q_{\rm pr} =$', result[4])
-        st.write(r'$A =$', result[5])
-        st.write(r'$g_{\rm sca} =$', result[6])
+    S11 = np.zeros((nang2, nlam))
+    S12 = np.zeros((nang2, nlam))
+    S33 = np.zeros((nang2, nlam))
+    S34 = np.zeros((nang2, nlam))
 
-        if doSA:
-            fig, ax = plt.subplots(2, 1, sharex=True)
-            theta = np.linspace(0, 180, nang2)
-
-            ax[0].plot(theta, matrix[0]/matrix[0][0])
-            ax[0].set_ylabel('S11')
-            ax[0].set_yscale('log')
-
-            ax[1].plot(theta, -matrix[1]/matrix[0])
-            ax[1].set_xlabel('scattering angle')
-            ax[1].set_ylabel('-S12 / S11')
-
-            st.pyplot(fig)
+    radminlog = np.log10(radmin)
+    radmaxlog = np.log10(radmax)
+    if nrad > 1:
+        steplog = (radmaxlog - radminlog) / (nrad - 1.0)
     else:
-        Q_ext_tmp = np.zeros(nsize)
-        Q_abs_tmp = np.zeros(nsize)
-        Q_sca_tmp = np.zeros(nsize)
-        Q_bk_tmp = np.zeros(nsize)
-        g_sca_tmp = np.zeros(nsize)
-        S_11_tmp = np.zeros((nsize, nang2))
-        S_12_tmp = np.zeros((nsize, nang2))
-        for s, size_param in enumerate(size_parameter):
-            result = miex.shexqnn2(size_param, ri, nang, doSA)
-            matrix = miex.scattering_matrix_elements(result[7], result[8])
-            Q_ext_tmp[s] = result[0]
-            Q_abs_tmp[s] = result[1]
-            Q_sca_tmp[s] = result[2]
-            Q_bk_tmp[s] = result[3]
-            g_sca_tmp[s] = result[6]
-            S_11_tmp[s] = matrix[0]
-            S_12_tmp[s] = matrix[1]
+        steplog = 0.0
+
+    for ilam in range(nlam):
+        weisum = 0.0
+        wrad = 0.0
+        wqsc = 0.0
+        refmed = 1.0
+
+        for irad in range(nrad):
+            # current radius / radius interval
+            rad = 10.0**(radminlog + irad * steplog)
+            rad1 = 10.0**(radminlog + (irad + 1.0) * steplog)
+            if nrad > 1:
+                delrad = rad1 - rad
+            else:
+                delrad = 1.0
+
+            # size parameter
+            x = 2.0 * np.pi * rad * refmed / wavelength[ilam]
+
+            # complex refractive index
+            ri = complex(ri_real[ilam], ri_imag[ilam]) / refmed
+
+            # derive the scattering parameters
+            q_extx, q_absx, q_scax, q_bkx, q_prx, albedox, g_scax, S1x, S2x = miex.shexqnn2(x, ri, nang, doSA)
+
+            # update average values
+            weight = rad**exponent * delrad
+            weisum = weisum + weight
+
+            wradx = np.pi * (rad * 1.0e-6)**2 * weight
+            wqscx = wradx * q_scax
+
+            wrad += wradx
+            wqsc += wqscx
+
+            c_ext[ilam] += q_extx * wradx
+            c_sca[ilam] += q_scax * wradx
+            c_bk[ilam] += q_bkx * wradx
+            c_abs[ilam] += q_absx * wradx
+
+            q_ext[ilam] += q_extx * wradx
+            q_sca[ilam] += q_scax * wradx
+            q_bk[ilam] += q_bkx * wradx
+            q_abs[ilam] += q_absx * wradx
+
+            g_sca[ilam] += g_scax * wqscx
+
+            S11x, S12x, S33x, S34x = miex.scattering_matrix_elements(S1x, S2x)
+
+            S11[:,ilam] += S11x * weight
+            S12[:,ilam] += S12x * weight
+            S33[:,ilam] += S33x * weight
+            S34[:,ilam] += S34x * weight
+
+        c_ext[ilam] /= weisum
+        c_sca[ilam] /= weisum
+        c_bk[ilam] /= weisum
+        c_abs[ilam] /= weisum
+
+        q_ext[ilam] /= wrad
+        q_sca[ilam] /= wrad
+        q_bk[ilam] /= wrad
+        q_abs[ilam] /= wrad
+
+        S11[:,ilam] /= weisum
+        S12[:,ilam] /= weisum
+        S33[:,ilam] /= weisum
+        S34[:,ilam] /= weisum
+
+        albedo[ilam] = c_sca[ilam] / c_ext[ilam]
+        g_sca[ilam] /= wqsc
+
+    data_dict = {
+        'wavelength': wavelength,
+        'Qext': q_ext,
+        'Qabs': q_abs,
+        'Qsca': q_sca,
+        'Qbk': q_bk,
+        'Qpr': q_ext - g_sca * q_sca,
+        'A': albedo,
+        'gsca': g_sca,
+    }
+
+    if nlam == 1:
+        df = pd.DataFrame(data_dict)
+        st.dataframe(
+            df, use_container_width=True, hide_index=True,
+            column_config={key: st.column_config.NumberColumn(format='%e') for key in data_dict},
+            )
+    else:
+        fig, ax = plt.subplots(2, 1, sharex=True, layout='constrained')
+
+        ax[0].plot(wavelength, q_ext, label='extinction')
+        ax[0].plot(wavelength, q_abs, label='absorption')
+        ax[0].plot(wavelength, q_sca, label='scattering')
+        ax[0].plot(wavelength, q_bk, label='backscattering')
+        ax[0].plot(wavelength, q_ext - g_sca * q_sca, label='radiation pressure')
+
+        ax[0].set_ylabel('efficiency factor')
+        ax[0].set_yscale('log')
+        ax[0].legend()
+
+        ax[1].plot(wavelength, albedo, label='single scattering albedo')
+        ax[1].plot(wavelength, q_sca, label='scattering assymetry factor')
         
-        Q_ext = np.trapz(Q_ext_tmp * size_distribution, x=size_parameter)
-        Q_abs = np.trapz(Q_abs_tmp * size_distribution, x=size_parameter)
-        Q_sca = np.trapz(Q_sca_tmp * size_distribution, x=size_parameter)
-        Q_bk = np.trapz(Q_bk_tmp * size_distribution, x=size_parameter)
-        g_sca = np.trapz(g_sca_tmp * size_distribution, x=size_parameter)
-        Q_pr = Q_ext - g_sca * Q_sca
-        Albedo = Q_sca / Q_ext
+        # ax[1].set_yscale('log')
+        ax[1].set_xlabel('wavelength [micron]')
+        ax[1].set_xscale('log')
+        ax[1].legend()
 
-        S_11 = np.zeros(nang2)
-        S_12 = np.zeros(nang2)
-        for i in range(nang2):
-            S_11[i] = np.trapz(S_11_tmp[:,i] * size_distribution, x=size_parameter)
-            S_12[i] = np.trapz(S_12_tmp[:,i] * size_distribution, x=size_parameter)
+        st.pyplot(fig, use_container_width=True)
 
-        st.write(r'$Q_{\rm ext} =$', result[0])
-        st.write(r'$Q_{\rm abs} =$', result[1])
-        st.write(r'$Q_{\rm sca} =$', result[2])
-        st.write(r'$Q_{\rm bk} =$', result[3])
-        st.write(r'$Q_{\rm pr} =$', result[4])
-        st.write(r'$A =$', result[5])
-        st.write(r'$g_{\rm sca} =$', result[6])
-
-        if doSA:
-            fig, ax = plt.subplots(2, 1, sharex=True)
+    if doSA:
+        if nlam == 1:
+            fig, ax = plt.subplots(2, 2, sharex=True, layout='constrained')
             theta = np.linspace(0, 180, nang2)
 
-            ax[0].plot(theta, S_11/S_11[0])
-            ax[0].set_ylabel('S11')
-            ax[0].set_yscale('log')
+            fig.suptitle(f'wavelength: {wavelength[0]} [micron]')
 
-            ax[1].plot(theta, -S_12/S_11)
-            ax[1].set_xlabel('scattering angle')
-            ax[1].set_ylabel('-S12 / S11')
+            ax[0,0].plot(theta, S11[:,0] / S11[0,0])
+            ax[0,0].set_ylabel('S11 / S11(0 deg)')
+            ax[0,0].set_yscale('log')
 
-            st.pyplot(fig)
+            ax[0,1].plot(theta, -S12[:,0] / S11[:,0])
+            ax[0,1].set_ylabel('-S12 / S11')
+            ax[0,1].yaxis.set_label_position("right")
+            ax[0,1].yaxis.tick_right()
+
+            ax[1,0].plot(theta, S33[:,0] / S11[:,0])
+            ax[1,0].set_xlabel('scattering angle [deg]')
+            ax[1,0].set_ylabel('S33 / S11')
+
+            ax[1,1].plot(theta, S34[:,0] / S11[:,0])
+            ax[1,1].set_xlabel('scattering angle [deg]')
+            ax[1,1].set_ylabel('S34 / S11')
+            ax[1,1].yaxis.set_label_position("right")
+            ax[1,1].yaxis.tick_right()
+
+        else:
+            fig, ax = plt.subplots(2, 2, sharex=True, sharey=True, layout='constrained')
+
+            theta = np.linspace(0, 180, nang2)
+
+            im = ax[0,0].pcolormesh(theta, wavelength, np.transpose(S11 / S11[0,:]), vmax=1, vmin=0, shading='nearest')
+            ax[0,0].set_title('S11 / S11(0 deg)')
+            ax[0,0].set_ylabel('wavelength [micron]')
+            ax[0,0].set_yscale('log')
+            fig.colorbar(im, ax=ax[0,0])
+
+            im = ax[0,1].pcolormesh(theta, wavelength, np.transpose(-S12 / S11), vmin=-1, vmax=1, cmap='bwr')
+            ax[0,1].set_title('-S12 / S11')
+            fig.colorbar(im, ax=ax[0,1])
+
+            im = ax[1,0].pcolormesh(theta, wavelength, np.transpose(S33 / S11), vmin=-1, vmax=1, cmap='bwr')
+            ax[1,0].set_title('S33 / S11')
+            ax[1,0].set_xlabel('scattering angle [deg]')
+            ax[1,0].set_ylabel('wavelength [micron]')
+            fig.colorbar(im, ax=ax[1,0])
+
+            im = ax[1,1].pcolormesh(theta, wavelength, np.transpose(S34 / S11), vmin=-1, vmax=1, cmap='bwr')
+            ax[1,1].set_title('S34 / S11')
+            ax[1,1].set_xlabel('scattering angle [deg]')
+            fig.colorbar(im, ax=ax[1,1])
+
+        st.pyplot(fig, use_container_width=True)

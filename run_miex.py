@@ -198,8 +198,8 @@ def main(input_filename):
                     print(int(counter / (nlam * ncomp * nrad) * 100), '%', end='\r')
 
                 # current radius / radius interval
-                rad = 10.0**(radminlog + (irad - 1.0) * steplog)
-                rad1 = 10.0**(radminlog + irad * steplog)
+                rad = 10.0**(radminlog + irad * steplog)
+                rad1 = 10.0**(radminlog + (irad + 1.0) * steplog)
                 if nrad > 1:
                     delrad = rad1 - rad
                 else:
@@ -209,7 +209,7 @@ def main(input_filename):
                 x = 2.0 * np.pi * rad * refmed / wavelength[ilam]
 
                 # complex refractive index
-                ri = complex(n_real[icomp, ilam], k_imag[icomp, ilam]) / refmed
+                ri = complex(n_real[icomp,ilam], k_imag[icomp,ilam]) / refmed
 
                 # derive the scattering parameters
                 q_extx, q_absx, q_scax, q_bkx, q_prx, albedox, g_scax, S1x, S2x = miex.shexqnn2(x, ri, nang, doSA)
@@ -243,12 +243,12 @@ def main(input_filename):
                 S33[:,ilam] += S33x * weight
                 S34[:,ilam] += S34x * weight
 
-        c_ext[ilam] /=weisum
+        c_ext[ilam] /= weisum
         c_sca[ilam] /= weisum
         c_bk[ilam] /= weisum
         c_abs[ilam] /= weisum
 
-        q_ext[ilam] /=wrad
+        q_ext[ilam] /= wrad
         q_sca[ilam] /= wrad
         q_bk[ilam] /= wrad
         q_abs[ilam] /= wrad

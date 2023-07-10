@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 nang = 91
 nang2 = 2 * nang - 1
 # complex refractive index
-m = 1.5 + 0.0j
+m = complex(1.5, 0.0)
 # size parameter
 x = 10.0
 
@@ -45,10 +45,10 @@ nang2 = 2 * nang - 1
 # number of size parameters
 nsize = 100
 # complex refractive index
-m = 1.5 + 0.0j
+m = complex(1.5, 0.0)
 
 # array of size parameter and size distribution
-x_arr = np.geomspace(1e-2, 1e1, nsize)
+x_arr = np.geomspace(1e-1, 1e1, nsize)
 nx_arr = x_arr**(-3.5)
 
 # run miex and calculate scattering matrix elements
@@ -62,9 +62,10 @@ for i, x in enumerate(x_arr):
 
 S_11 = np.zeros(nang2)
 S_12 = np.zeros(nang2)
+weight = np.trapz(nx_arr, x=x_arr)
 for i in range(nang2):
-    S_11[i] = np.trapz(S_11_tmp[:,i] * nx_arr, x=x_arr)
-    S_12[i] = np.trapz(S_12_tmp[:,i] * nx_arr, x=x_arr)
+    S_11[i] = np.trapz(S_11_tmp[:,i] * nx_arr, x=x_arr) / weight
+    S_12[i] = np.trapz(S_12_tmp[:,i] * nx_arr, x=x_arr) / weight
 
 # plot the results
 fig, ax = plt.subplots(2, 1, sharex=True, layout='constrained')
@@ -87,7 +88,7 @@ plt.show()
 # calculate efficiency factors for multiple particle sizes
 
 # complex refractive index
-m = 1.5 + 0.01j
+m = complex(1.5, 0.01)
 # number of size parameters
 nsize = 1000
 
