@@ -332,6 +332,101 @@ def main(input_filename):
         else:
             output_file.write('# not calculated.\n')
 
+    #---------------------------------------------------------------------------------------------------
+    if svsep:
+        # 1. Extinction efficiency factor
+        with open('results/' + fresult + '.q_ext', 'w') as output_file:
+            for ilam in range(nlam):
+                output_file.write(f'{wavelength[ilam]} {q_ext[ilam]}\n')
+
+        # 2. Extinction cross section [m^2]
+        with open('results/' + fresult + '.c_ext', 'w') as output_file:
+            for ilam in range(nlam):
+                output_file.write(f'{wavelength[ilam]} {c_ext[ilam]}\n')
+
+        # 3. Scattering efficiency factor
+        with open('results/' + fresult + '.q_sca', 'w') as output_file:
+            for ilam in range(nlam):
+                output_file.write(f'{wavelength[ilam]} {q_sca[ilam]}\n')
+
+        # 4. Scattering cross section [m^2]
+        with open('results/' + fresult + '.c_sca', 'w') as output_file:
+            for ilam in range(nlam):
+                output_file.write(f'{wavelength[ilam]} {c_sca[ilam]}\n')
+
+        # 5. Backscattering effiency factor
+        with open('results/' + fresult + '.q_bk', 'w') as output_file:
+            for ilam in range(nlam):
+                output_file.write(f'{wavelength[ilam]} {q_bk[ilam]}\n')
+
+        # 6. Backscattering cross section [m^2]
+        with open('results/' + fresult + '.c_bk', 'w') as output_file:
+            for ilam in range(nlam):
+                output_file.write(f'{wavelength[ilam]} {c_bk[ilam]}\n')
+
+        # 7. Absorption efficieny factor
+        with open('results/' + fresult + '.q_abs', 'w') as output_file:
+            for ilam in range(nlam):
+                output_file.write(f'{wavelength[ilam]} {q_abs[ilam]}\n')
+
+        # 8. Absorption cross section [m^2]
+        with open('results/' + fresult + '.c_abs', 'w') as output_file:
+            for ilam in range(nlam):
+                output_file.write(f'{wavelength[ilam]} {c_abs[ilam]}\n')
+
+        # 9. Albedo
+        with open('results/' + fresult + '.alb', 'w') as output_file:
+            for ilam in range(nlam):
+                output_file.write(f'{wavelength[ilam]} {albedo[ilam]}\n')
+
+        # 10. Scattering asymmetry factor g
+        with open('results/' + fresult + '.g_sca', 'w') as output_file:
+            for ilam in range(nlam):
+                output_file.write(f'{wavelength[ilam]} {g_sca[ilam]}\n')
+
+        # 11. Q_pr
+        with open('results/' + fresult + '.q_pr', 'w') as output_file:
+            for ilam in range(nlam):
+                output_file.write(f'{wavelength[ilam]} {q_ext[ilam] - g_sca[ilam] * q_sca[ilam]}\n')
+
+        # 12. Scattering Matrix elements S11, S12, S33, and S34
+        if doSA:
+            # S11
+            with open('results/' + fresult + '.S11', 'w'):
+                for ilam in range(nlam):
+                    output_file.write(f'{wavelength[ilam]}\n')
+                    for iang in range(nang2):
+                        # angx: scattering angle [degree]
+                        angx = iang * 180.0 / (nang2 - 1.0)
+                        output_file.write(f'{angx} {S11[iang,ilam]}\n')
+
+            # S12
+            with open('results/' + fresult + '.S12', 'w'):
+                for ilam in range(nlam):
+                    output_file.write(f'{wavelength[ilam]}\n')
+                    for iang in range(nang2):
+                        # angx: scattering angle [degree]
+                        angx = iang * 180.0 / (nang2 - 1.0)
+                        output_file.write(f'{angx} {S11[iang,ilam]}\n')
+
+            # S33
+            with open('results/' + fresult + '.S33', 'w'):
+                for ilam in range(nlam):
+                    output_file.write(f'{wavelength[ilam]}\n')
+                    for iang in range(nang2):
+                        # angx: scattering angle [degree]
+                        angx = iang * 180.0 / (nang2 - 1.0)
+                        output_file.write(f'{angx} {S11[iang,ilam]}\n')
+
+            # S34
+            with open('results/' + fresult + '.S34', 'w'):
+                for ilam in range(nlam):
+                    output_file.write(f'{wavelength[ilam]}\n')
+                    for iang in range(nang2):
+                        # angx: scattering angle [degree]
+                        angx = iang * 180.0 / (nang2 - 1.0)
+                        output_file.write(f'{angx} {S11[iang,ilam]}\n')
+
     print('    ... done.')
 
 
