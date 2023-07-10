@@ -9,17 +9,18 @@ is a Mie scattering code for large grains.
 
 ### Run miex
 
-run_miex.py executes miex with the parameters of the input file:
+[run_miex.py](run_miex.py) executes miex with the parameters of the input file:
 
 ```bash
 python3 run_miex.py example1.input
 python3 run_miex.py example2.input
 ```
+The results are stored in the `results` directory.
 
 
 ### Run miex via streamlit
 
-miex can be used in a simple Streamlit web app. Install streamlit
+[miex_app.py](miex_app.py) can be used as a simple Streamlit web app. Install streamlit
 ```bash
 pip3 install streamlit
 ```
@@ -31,7 +32,7 @@ streamlit run miex_app.py
 
 ### Import miex
 
-miex.py can be imported and used in any python script (see [example script](miex_example.py) or [jupyter notebook](miex_notebook.ipynb)):
+[miex.py](miex.py) can be imported and used in any python script (see [example script](miex_example.py) or [jupyter notebook](miex_notebook.ipynb)):
 
 ```bash
 python3 miex_example.py
@@ -40,7 +41,7 @@ python3 miex_example.py
 
 ### Test miex
 
-test_miex.py includes some test routines. The results are compared with results by [Bohren & Huffman (1998)](https://doi.org/10.1002/9783527618156) and by [Wiscombe (1979)](https://doi.org/10.5065/D6ZP4414):
+[test_miex.py](test_miex.py) includes some test routines. The results are compared with results by [Bohren & Huffman (1998)](https://doi.org/10.1002/9783527618156) and by [Wiscombe (1979)](https://doi.org/10.5065/D6ZP4414):
 
 ```bash
 python3 test_miex.py
