@@ -289,8 +289,6 @@ if run_miex:
                 output_file += f'{wavelength[ilam]} {angx} {S11[iang,ilam]} {S12[iang,ilam]} {S33[iang,ilam]} {S34[iang,ilam]}\n'
     else:
         output_file += '# not calculated.\n'
-        
-    st.download_button('Download results', output_file, file_name='results.txt')
 
     #---------------------------------------------------------------------------------------------------
     # 5. Plot the results
@@ -393,4 +391,6 @@ if run_miex:
 
             st.pyplot(fig, use_container_width=True)
 
-    placeholder.success('Done!')
+    with placeholder.container():
+        st.success('Done!')
+        st.download_button('Download results', output_file, file_name='results.txt')
