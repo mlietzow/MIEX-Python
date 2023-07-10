@@ -17,7 +17,7 @@ st.text('MIEX is a Mie scattering code for large grains')
 st.divider()
 
 radio_wavelength = st.radio(
-    'Single wavelength or upload a dust data files (three columns: wavelength/micron real imag):',
+    'Single wavelength or upload dust data files (three columns: wavelength/micron real imag):',
     options=['single', 'upload'], horizontal=True)
 
 if radio_wavelength == 'single':
@@ -35,7 +35,7 @@ else:
     with col1:
         ncomp = st.number_input('Number of chemical components:', value=1, format='%d', step=1, min_value=1)
     with col2:
-        nlam = st.number_input('Number wavelegnths:', value=100, format='%d', step=1, min_value=1)
+        nlam = st.number_input('Number of wavelengths:', value=100, format='%d', step=1, min_value=1)
     fnames = []
     abun = np.ones(ncomp) * 100.0
     for icomp in range(ncomp):
