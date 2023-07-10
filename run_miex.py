@@ -68,7 +68,7 @@ def main(input_filename):
         print(f'Number of chemical components                 : {ncomp}')
 
         fnames = []
-        abun = np.zeros(ncomp)
+        abun = np.ones(ncomp) * 100.0
 
         #---------------------------------------------------------------------------------------------------
         print('Name of the dust data files (lambda/n/k data)')
@@ -85,9 +85,8 @@ def main(input_filename):
                 ab = float(input_file.readline())
                 print(f'    {icomp+1}. component : {ab}')
                 abun[icomp] = ab
-        else:
-            abun = 100.0
-        abun = abun / 100.0
+
+        abun /= 100.0
 
         ask1 = int(input_file.readline())
         print('-1- Single grain size')

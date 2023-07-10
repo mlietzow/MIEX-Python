@@ -29,13 +29,22 @@ if radio_wavelength == 'single':
 
     wavelength = np.array([st.number_input(r'Wavelength $\lambda$ [micron]:', value=1.0, format='%f', step=0.1)])
     nlam = 1
+    abun = np.array([1.0])
 else:
-    uploaded_file = st.file_uploader('Choose a file')
-    if uploaded_file is not None:
-        wavelength, ri_real, ri_imag = np.loadtxt(uploaded_file, unpack=True, comments='#', converters=conv)
-    else:
-        wavelength = np.array([1.0])
-    nlam = len(wavelength)
+    col1, col2 = st.columns(2)
+    with col1:
+        ncomp = st.number_input('Number of chemical components:', value=1, format='%d', step=1, min_value=1)
+    with col2:
+        nlam = st.number_input('Number wavelegnths:', value=100, format='%d', step=1, min_value=1)
+    fnames = []
+    abun = np.ones(ncomp) * 100.0
+    for icomp in range(ncomp):
+        with col1:
+            fnames.append(st.file_uploader(f'Choose {icomp+1}. component:', key=f'file{icomp}'))
+        with col2:
+            abun[icomp] = st.number_input(f'Relative abundance of the {icomp+1}. component [%]:', value=100.0, format='%f', step=1.0, key=f'abun{icomp}')
+    
+    abun /= 100.0
 
 st.divider()
 
@@ -71,6 +80,10 @@ with col2:
 st.divider()
 
 if st.button('Run'):
+    wavelength = np.zeros(nlam)
+    ri_real = np.zeros((ncomp, nlam))
+    ri_imag = np.zeros((ncomp, nlam))
+
     q_ext = np.zeros(nlam)
     q_sca = np.zeros(nlam)
     q_abs = np.zeros(nlam)
@@ -92,6 +105,25 @@ if st.button('Run'):
     S33 = np.zeros((nang2, nlam))
     S34 = np.zeros((nang2, nlam))
 
+    if np.sum(abun) != 1:
+        st.warning('Warning: The sum of the relative abundances is not 100 %')
+
+    # read lambda/n/k database
+    for icomp in range(ncomp):
+        if fnames[icomp] is None:
+            st.error('Error: Dust data file missing!')
+            st.stop()
+        w, n, k = np.loadtxt(fnames[icomp], unpack=True, comments='#', converters=conv)
+        wavelength = w[:nlam]
+        ri_real[icomp] = n[:nlam]
+        ri_imag[icomp] = k[:nlam]
+        # first two lines of file give information about the content of the file; no need to save in a variable
+
+    placeholder = st.empty()
+    with placeholder.container():
+        progress_text = 'Calculating optical properties ...'
+        progress_bar = st.progress(0, text=progress_text)
+
     radminlog = np.log10(radmin)
     radmaxlog = np.log10(radmax)
     if nrad > 1:
@@ -99,58 +131,65 @@ if st.button('Run'):
     else:
         steplog = 0.0
 
+    counter = 0
     for ilam in range(nlam):
         weisum = 0.0
         wrad = 0.0
         wqsc = 0.0
         refmed = 1.0
 
-        for irad in range(nrad):
-            # current radius / radius interval
-            rad = 10.0**(radminlog + irad * steplog)
-            rad1 = 10.0**(radminlog + (irad + 1.0) * steplog)
-            if nrad > 1:
-                delrad = rad1 - rad
-            else:
-                delrad = 1.0
+        for icomp in range(ncomp):
+            for irad in range(nrad):
+                # show progress every 1 per cent
+                counter += 1
+                if int(counter % ((nlam * ncomp * nrad) / 10)) == 0:
+                    progress_bar.progress(int(counter / (nlam * ncomp * nrad) * 100), text=progress_text)
 
-            # size parameter
-            x = 2.0 * np.pi * rad * refmed / wavelength[ilam]
+                # current radius / radius interval
+                rad = 10.0**(radminlog + irad * steplog)
+                rad1 = 10.0**(radminlog + (irad + 1.0) * steplog)
+                if nrad > 1:
+                    delrad = rad1 - rad
+                else:
+                    delrad = 1.0
 
-            # complex refractive index
-            ri = complex(ri_real[ilam], ri_imag[ilam]) / refmed
+                # size parameter
+                x = 2.0 * np.pi * rad * refmed / wavelength[ilam]
 
-            # derive the scattering parameters
-            q_extx, q_absx, q_scax, q_bkx, q_prx, albedox, g_scax, S1x, S2x = miex.shexqnn2(x, ri, nang, doSA)
+                # complex refractive index
+                ri = complex(ri_real[icomp,ilam], ri_imag[icomp,ilam]) / refmed
 
-            # update average values
-            weight = rad**exponent * delrad
-            weisum = weisum + weight
+                # derive the scattering parameters
+                q_extx, q_absx, q_scax, q_bkx, q_prx, albedox, g_scax, S1x, S2x = miex.shexqnn2(x, ri, nang, doSA)
 
-            wradx = np.pi * (rad * 1.0e-6)**2 * weight
-            wqscx = wradx * q_scax
+                # update average values
+                weight = abun[icomp] * rad**exponent * delrad
+                weisum = weisum + weight
 
-            wrad += wradx
-            wqsc += wqscx
+                wradx = np.pi * (rad * 1.0e-6)**2 * weight
+                wqscx = wradx * q_scax
 
-            c_ext[ilam] += q_extx * wradx
-            c_sca[ilam] += q_scax * wradx
-            c_bk[ilam] += q_bkx * wradx
-            c_abs[ilam] += q_absx * wradx
+                wrad += wradx
+                wqsc += wqscx
 
-            q_ext[ilam] += q_extx * wradx
-            q_sca[ilam] += q_scax * wradx
-            q_bk[ilam] += q_bkx * wradx
-            q_abs[ilam] += q_absx * wradx
+                c_ext[ilam] += q_extx * wradx
+                c_sca[ilam] += q_scax * wradx
+                c_bk[ilam] += q_bkx * wradx
+                c_abs[ilam] += q_absx * wradx
 
-            g_sca[ilam] += g_scax * wqscx
+                q_ext[ilam] += q_extx * wradx
+                q_sca[ilam] += q_scax * wradx
+                q_bk[ilam] += q_bkx * wradx
+                q_abs[ilam] += q_absx * wradx
 
-            S11x, S12x, S33x, S34x = miex.scattering_matrix_elements(S1x, S2x)
+                g_sca[ilam] += g_scax * wqscx
 
-            S11[:,ilam] += S11x * weight
-            S12[:,ilam] += S12x * weight
-            S33[:,ilam] += S33x * weight
-            S34[:,ilam] += S34x * weight
+                S11x, S12x, S33x, S34x = miex.scattering_matrix_elements(S1x, S2x)
+
+                S11[:,ilam] += S11x * weight
+                S12[:,ilam] += S12x * weight
+                S33[:,ilam] += S33x * weight
+                S34[:,ilam] += S34x * weight
 
         c_ext[ilam] /= weisum
         c_sca[ilam] /= weisum
@@ -169,6 +208,8 @@ if st.button('Run'):
 
         albedo[ilam] = c_sca[ilam] / c_ext[ilam]
         g_sca[ilam] /= wqsc
+
+    placeholder.info('Plotting results ...')
 
     data_dict = {
         'wavelength': wavelength,
@@ -263,3 +304,5 @@ if st.button('Run'):
             fig.colorbar(im, ax=ax[1,1])
 
         st.pyplot(fig, use_container_width=True)
+
+    placeholder.success('Done!')
