@@ -4,7 +4,7 @@
 [![bibcode](https://img.shields.io/badge/bibcode-2004CoPhC.162..113W-blue)](https://ui.adsabs.harvard.edu/abs/2004CoPhC.162..113W)
 [![doi](https://img.shields.io/badge/doi-10.1016%2Fj.cpc.2004.06.070-yellow)](https://doi.org/10.1016/j.cpc.2004.06.070)
 
-is a Mie scattering code for large grains for Python.
+is a Mie scattering code for large grains.
 
 
 ### Run miex
@@ -31,7 +31,7 @@ streamlit run miex_app.py
 
 ### Import miex
 
-miex.py can be imported and used in any python script (see example script):
+miex.py can be imported and used in any python script (see [example script](miex_example.py) or [jupyter notebook](miex_notebook.ipynb)):
 
 ```bash
 python3 miex_example.py
