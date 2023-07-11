@@ -340,7 +340,7 @@ if run_miex:
             ax[0].legend()
 
             ax[1].plot(wavelength, albedo, label='single scattering albedo')
-            ax[1].plot(wavelength, q_sca, label='scattering assymetry factor')
+            ax[1].plot(wavelength, g_sca, label='scattering assymetry factor')
             
             # ax[1].set_yscale('log')
             ax[1].set_xlabel('wavelength [micron]')
