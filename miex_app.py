@@ -33,6 +33,7 @@ if radio_wavelength == 'single':
     ncomp = 1
     abun = np.array([1.0])
 else:
+    st.info('all data files have to contain the refractive index and the same wavelength distribution')
     with col1:
         ncomp = st.number_input('Number of chemical components:', value=1, format='%d', step=1, min_value=1)
     with col2:
@@ -130,10 +131,13 @@ if run_miex:
                 st.error('Error: Dust data file missing!')
                 st.stop()
             w, n, k = np.loadtxt(fnames[icomp], unpack=True, comments='#', converters=conv)
-            wavelength = w[:nlam]
-            ri_real[icomp] = n[:nlam]
-            ri_imag[icomp] = k[:nlam]
-            # first two lines of file give information about the content of the file; no need to save in a variable
+            if nlam <= len(w):
+                wavelength = w[:nlam]
+                ri_real[icomp] = n[:nlam]
+                ri_imag[icomp] = k[:nlam]
+            else:
+                st.error('Error: Number of defined wavelengths is larger than the number of wavelengths given in the file')
+                st.stop()
 
     # define radial step width
     radminlog = np.log10(radmin)
@@ -178,8 +182,12 @@ if run_miex:
                 # complex refractive index
                 ri = complex(ri_real[icomp,ilam], ri_imag[icomp,ilam]) / refmed
 
-                # derive the scattering parameters
-                q_extx, q_absx, q_scax, q_bkx, q_prx, albedox, g_scax, S1x, S2x = miex.shexqnn2(x, ri, nang, doSA)
+                try:
+                    # derive the scattering parameters
+                    q_extx, q_absx, q_scax, q_bkx, q_prx, albedox, g_scax, S1x, S2x = miex.shexqnn2(x, ri, nang, doSA)
+                except Exception as e:
+                    st.error(e)
+                    st.stop()
 
                 # update average values
                 weight = abun[icomp] * rad**exponent * delrad
@@ -309,49 +317,63 @@ if run_miex:
     if plot_res:
         placeholder.info('Plotting results ...')
 
-        data_dict = {
-            'wavelength': wavelength,
-            'Qext': q_ext,
-            'Qabs': q_abs,
-            'Qsca': q_sca,
-            'Qbk': q_bk,
-            'Qpr': q_ext - g_sca * q_sca,
-            'A': albedo,
-            'gsca': g_sca,
-        }
-
         if nlam == 1:
+            data_dict = {
+                'wavelength': wavelength,
+                'Q_ext': q_ext,
+                'C_ext [m^2]' : c_ext,
+                'Q_abs': q_abs,
+                'C_abs [m^2]': c_abs,
+                'Q_sca': q_sca,
+                'C_sca [m^2]': c_sca,
+                'Q_bk': q_bk,
+                'C_bk [m^2]': c_bk,
+                'Qpr': q_ext - g_sca * q_sca,
+                'A': albedo,
+                'gsca': g_sca,
+            }
+
             df = pd.DataFrame(data_dict)
             st.dataframe(
                 df, use_container_width=True, hide_index=True,
                 column_config={key: st.column_config.NumberColumn(format='%e') for key in data_dict},
                 )
+
         else:
-            fig, ax = plt.subplots(2, 1, sharex=True, layout='constrained')
+            fig, ax = plt.subplots(3, 1, sharex=True, figsize=(6.4, 6.4), layout='constrained')
 
-            ax[0].plot(wavelength, q_ext, label='extinction')
-            ax[0].plot(wavelength, q_abs, label='absorption')
-            ax[0].plot(wavelength, q_sca, label='scattering')
-            ax[0].plot(wavelength, q_bk, label='backscattering')
-            ax[0].plot(wavelength, q_ext - g_sca * q_sca, label='radiation pressure')
+            ax[0].plot(wavelength, c_ext, label='extinction')
+            ax[0].plot(wavelength, c_abs, label='absorption')
+            ax[0].plot(wavelength, c_sca, label='scattering')
+            ax[0].plot(wavelength, c_bk, label='backscattering')
 
-            ax[0].set_ylabel('efficiency factor')
+            ax[0].set_ylabel(r'cross section [m$^2$]')
             ax[0].set_yscale('log')
             ax[0].legend()
 
-            ax[1].plot(wavelength, albedo, label='single scattering albedo')
-            ax[1].plot(wavelength, g_sca, label='scattering assymetry factor')
-            
-            # ax[1].set_yscale('log')
-            ax[1].set_xlabel('wavelength [micron]')
-            ax[1].set_xscale('log')
+            ax[1].plot(wavelength, q_ext, label='extinction')
+            ax[1].plot(wavelength, q_abs, label='absorption')
+            ax[1].plot(wavelength, q_sca, label='scattering')
+            ax[1].plot(wavelength, q_bk, label='backscattering')
+            ax[1].plot(wavelength, q_ext - g_sca * q_sca, label='radiation pressure')
+
+            ax[1].set_ylabel('efficiency factor')
+            ax[1].set_yscale('log')
             ax[1].legend()
+
+            ax[2].plot(wavelength, albedo, label='single scattering albedo')
+            ax[2].plot(wavelength, g_sca, label='scattering assymetry factor')
+            
+            # ax[2].set_yscale('log')
+            ax[2].set_xlabel('wavelength [micron]')
+            ax[2].set_xscale('log')
+            ax[2].legend()
 
             st.pyplot(fig, use_container_width=True)
 
         if doSA:
             if nlam == 1:
-                fig, ax = plt.subplots(2, 2, sharex=True, layout='constrained')
+                fig, ax = plt.subplots(2, 2, sharex=True, figsize=(6.4, 4.8), layout='constrained')
                 theta = np.linspace(0, 180, nang2)
 
                 fig.suptitle(f'wavelength: {wavelength[0]} [micron]')
@@ -376,7 +398,7 @@ if run_miex:
                 ax[1,1].yaxis.tick_right()
 
             else:
-                fig, ax = plt.subplots(2, 2, sharex=True, sharey=True, layout='constrained')
+                fig, ax = plt.subplots(2, 2, sharex=True, sharey=True, figsize=(6.4, 4.8), layout='constrained')
 
                 theta = np.linspace(0, 180, nang2)
 

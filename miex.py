@@ -140,7 +140,7 @@ def shexqnn2(x, ri, nang=1, doSA=False):
     factor = 1.0e+250
 
     if x <= xmin:
-        raise Exception(f'Mie scattering limit exceeded, current size parameter: {x}')
+        raise Exception('Mie scattering limit exceeded, current size parameter:', x)
     
     ax = 1.0 / x
     b = 2.0 * ax**2
