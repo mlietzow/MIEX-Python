@@ -20,18 +20,19 @@ radio_wavelength = st.radio(
     'Single wavelength or upload dust data files (three columns: wavelength/micron real imag):',
     options=['single', 'upload'], horizontal=True)
 
+col1, col2 = st.columns(2)
 if radio_wavelength == 'single':
     col1, col2 = st.columns(2)
     with col1:
-        ri_real = np.array([st.number_input('Real part of refractive index:', value=1.50, format='%f', step=0.01, min_value=1.0)])
+        input_ri_real = np.array([st.number_input('Real part of refractive index:', value=1.50, format='%f', step=0.01, min_value=1.0)])
+        input_wavelength = np.array([st.number_input(r'Wavelength $\lambda$ [micron]:', value=1.0, format='%f', step=0.1)])
     with col2:
-        ri_imag = np.array([st.number_input('Imaginary part of refractive index:', value=0.0, format='%f', step=0.01, min_value=0.0)])
+        input_ri_imag = np.array([st.number_input('Imaginary part of refractive index:', value=0.0, format='%f', step=0.01, min_value=0.0)])
 
-    wavelength = np.array([st.number_input(r'Wavelength $\lambda$ [micron]:', value=1.0, format='%f', step=0.1)])
     nlam = 1
+    ncomp = 1
     abun = np.array([1.0])
 else:
-    col1, col2 = st.columns(2)
     with col1:
         ncomp = st.number_input('Number of chemical components:', value=1, format='%d', step=1, min_value=1)
     with col2:
@@ -52,14 +53,15 @@ radio_grain = st.radio(
     'Single grain size or grain size distribution $n(r) \propto n^q$:',
     options=['single', 'distribution'], horizontal=True)
 
+col1, col2 = st.columns(2)
 if radio_grain == 'single':
-    radmin = st.number_input(r'Grain radius $r$ [micron]:', value=1.0, format='%f', step=0.1)
+    with col1:
+        radmin = st.number_input(r'Grain radius $r$ [micron]:', value=1.0, format='%f', step=0.1)
 
     radmax = radmin
     exponent = 0.0
     nrad = 1
 else:
-    col1, col2 = st.columns(2)
     with col1:
         radmin = st.number_input(r'Minimum grain size $r_{\rm min}$ [micron]:', value=0.01, format='%f', step=0.1)
         exponent = st.number_input(r'Size distribtion Exponent $q$', value=-3.5, format='%f', step=0.1)
@@ -117,16 +119,21 @@ if run_miex:
     if np.sum(abun) != 1:
         st.warning('Warning: The sum of the relative abundances is not 100 %')
 
-    # read lambda/n/k database
-    for icomp in range(ncomp):
-        if fnames[icomp] is None:
-            st.error('Error: Dust data file missing!')
-            st.stop()
-        w, n, k = np.loadtxt(fnames[icomp], unpack=True, comments='#', converters=conv)
-        wavelength = w[:nlam]
-        ri_real[icomp] = n[:nlam]
-        ri_imag[icomp] = k[:nlam]
-        # first two lines of file give information about the content of the file; no need to save in a variable
+    if radio_wavelength == 'single':
+        wavelength = input_wavelength
+        ri_real[0] = input_ri_real
+        ri_imag[0] = input_ri_imag
+    else:
+        # read lambda/n/k database
+        for icomp in range(ncomp):
+            if fnames[icomp] is None:
+                st.error('Error: Dust data file missing!')
+                st.stop()
+            w, n, k = np.loadtxt(fnames[icomp], unpack=True, comments='#', converters=conv)
+            wavelength = w[:nlam]
+            ri_real[icomp] = n[:nlam]
+            ri_imag[icomp] = k[:nlam]
+            # first two lines of file give information about the content of the file; no need to save in a variable
 
     # define radial step width
     radminlog = np.log10(radmin)
@@ -228,12 +235,17 @@ if run_miex:
     output_file += '#\n'
     output_file += f'# Number of wavelengths            : {nlam}\n'
     output_file += f'# Number of chemical components    : {ncomp}\n'
-    output_file += '# Relative abundances [%]          :\n'
-    for icomp in range(ncomp):
-        output_file += f'# {icomp+1}. component: {abun[icomp]*100}\n'
-    output_file += '# Name(s) of the dust data file(s) :\n'
-    for icomp in range(ncomp):
-        output_file += f'# {icomp+1}. component: {fnames[icomp].name}\n'
+    if radio_wavelength == 'single':
+        output_file += f'# Real part of refractive index    : {ri_real[0,0]}\n'
+        output_file += f'# Imag part of refractive index    : {ri_imag[0,0]}\n'
+        output_file += f'# Wavelength [micron]              : {wavelength[0]}\n'
+    else:
+        output_file += '# Relative abundances [%]          :\n'
+        for icomp in range(ncomp):
+            output_file += f'# {icomp+1}. component: {abun[icomp]*100}\n'
+        output_file += '# Name(s) of the dust data file(s) :\n'
+        for icomp in range(ncomp):
+            output_file += f'# {icomp+1}. component: {fnames[icomp].name}\n'
     output_file += f'# Minimum grain radius [micron]    : {radmin}\n'
     output_file += f'# Maximum grain radius [micron]    : {radmax}\n'
     output_file += f'# Size distribution exponent       : {exponent}\n'
