@@ -86,7 +86,7 @@ def shexqnn2(x, ri, nang=1, doSA=False):
         ri : complex float
             complex refractive index
 
-        nang: int, optional, default = False
+        nang: int, optional, default = 1
             half number of scattering angles theta in the intervall 0...pi/2 (equidistantly distributed).
 
         doSA : bool, optional, default = False
@@ -98,10 +98,10 @@ def shexqnn2(x, ri, nang=1, doSA=False):
             extinction efficiency
 
         1:  Q_abs : float
-            scattering efficiency
+            absorption efficiency
 
         2:  Q_sca : float
-            absorption efficiency
+            scattering efficiency
 
         3:  Q_bk : float
             backscattering efficiency
