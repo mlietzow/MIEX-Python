@@ -10,7 +10,7 @@ def conv(line):
     return line.replace(b'D', b'e')
 
 
-st.set_page_config(page_title='MIEX', page_icon=None, layout="wide")
+st.set_page_config(page_title='MIEX', page_icon=None)
 st.title('MIEX')
 st.text('MIEX is a Mie scattering code for large grains')
 
@@ -76,9 +76,9 @@ col1, col2 = st.columns(2)
 with col1:
     doSA = st.checkbox('Calculate scattering matrix elements', value=False)
 with col2:
-    nang = st.number_input(
-        r'Half number of scattering angles in the intervall $0$ to $\pi/2$ (equidistantly distributed):',
-        value=91, format='%d', step=1, min_value=1, disabled=not doSA)
+    nang2 = st.number_input(
+        r'Number of scattering angles in the intervall $0$ to $\pi$ (equidistantly distributed, must be odd):',
+        value=91, format='%d', step=2, min_value=1, disabled=not doSA)
 
 st.divider()
 
@@ -111,7 +111,6 @@ if run_miex:
     albedo = np.zeros(nlam)
     g_sca = np.zeros(nlam)
 
-    nang2 = 2 * nang - 1
     S11 = np.zeros((nang2, nlam))
     S12 = np.zeros((nang2, nlam))
     S33 = np.zeros((nang2, nlam))
@@ -119,6 +118,12 @@ if run_miex:
 
     if np.sum(abun) != 1:
         st.warning('Warning: The sum of the relative abundances is not 100 %')
+
+    if nang2 % 2 == 1:
+        nang = int(0.5 * (nang2 - 1) + 1)
+    else:
+        st.error('Error: Number of scattering angles must be odd!')
+        st.stop()
 
     if radio_wavelength == 'single':
         wavelength = input_wavelength
