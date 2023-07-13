@@ -35,7 +35,6 @@ The input file is organized as follows:
 | Grain size [micron] / Minimum grain size [micron]                              | float |
 | Maximum grain size [micron] <sup>1</sup>                                       | float |
 | Size distribution exponent <sup>1</sup>                                        | float |
-| Maximum grain size [micron] <sup>1</sup>                                       | float |
 | Number of size bins <sup>1</sup>                                               | int   |
 | Calculate scattering matrix elements (0: no / 1: yes)                          | int   |
 | Number of scattering angles in the interval [0, 180]; odd number! <sup>2</sup> | int   |
