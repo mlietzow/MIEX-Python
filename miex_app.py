@@ -51,7 +51,7 @@ else:
 st.divider()
 
 radio_grain = st.radio(
-    'Single grain size or grain size distribution $n(r) \propto n^q$:',
+    'Single grain size or grain size distribution:',
     options=['single', 'distribution'], horizontal=True)
 
 col1, col2 = st.columns(2)
@@ -62,10 +62,19 @@ if radio_grain == 'single':
     radmax = radmin
     exponent = 0.0
     nrad = 1
+    dist_type = ''
 else:
+    dist_type = st.radio(
+        'Distribution type',
+        options=[r'Power law', r'Power law with exponential decay'],
+        horizontal=True)
+    st.caption(r'Power law: $n(r) \propto n^q$')
+    st.caption(r'Power law with exponential decay: $n(r) \propto n^q \times \exp(-r / p)$')
     with col1:
         radmin = st.number_input(r'Minimum grain size $r_{\rm min}$ [micron]:', value=0.01, format='%f', step=0.1)
-        exponent = st.number_input(r'Size distribtion Exponent $q$', value=-3.5, format='%f', step=0.1)
+        exponent = st.number_input(r'Size distribtion exponent $q$', value=-3.5, format='%f', step=0.1)
+        if 'exponent' in dist_type:
+            parameter2 = st.number_input(r'Exponential decay parameter $p$', value=1.0, format='%f', step=0.1)
     with col2:
         radmax = st.number_input(r'Maximum grain size $r_{\rm max}$ [micron]:', value=1.0, format='%f', step=0.1)
         nrad = st.number_input(r'Number of size bins:', value=100, format='%d', step=1, min_value=1)
@@ -168,7 +177,7 @@ if run_miex:
 
         for icomp in range(ncomp):
             for irad in range(nrad):
-                # show progress every 1 per cent
+                # show progress every 10 per cent
                 counter += 1
                 if int(counter % ((nlam * ncomp * nrad) / 10)) == 0:
                     progress_bar.progress(int(counter / (nlam * ncomp * nrad) * 100), text=progress_text)
@@ -196,6 +205,8 @@ if run_miex:
 
                 # update average values
                 weight = abun[icomp] * rad**exponent * delrad
+                if 'exponential' in dist_type:
+                    weight *= np.exp(-rad / parameter2)
                 weisum = weisum + weight
 
                 wradx = np.pi * (rad * 1.0e-6)**2 * weight
@@ -259,10 +270,15 @@ if run_miex:
         output_file += '# Name(s) of the dust data file(s) :\n'
         for icomp in range(ncomp):
             output_file += f'# {icomp+1}. component: {fnames[icomp].name}\n'
-    output_file += f'# Minimum grain radius [micron]    : {radmin}\n'
-    output_file += f'# Maximum grain radius [micron]    : {radmax}\n'
-    output_file += f'# Size distribution exponent       : {exponent}\n'
-    output_file += f'# Number of size bins              : {nrad}\n'
+    if radio_grain == 'single':
+        output_file += f'# Grain radius [micron]            : {radmin}\n'
+    else:
+        output_file += f'# Minimum grain radius [micron]    : {radmin}\n'
+        output_file += f'# Maximum grain radius [micron]    : {radmax}\n'
+        output_file += f'# Size distribution exponent       : {exponent}\n'
+        if 'exponential' in dist_type:
+            output_file += f'# Exponential decay parameter      : {parameter2}\n'
+        output_file += f'# Number of size bins              : {nrad}\n'
     if doSA:
         output_file += f'# Number of scattering angles      : {nang2}\n'
     output_file += '#\n'
