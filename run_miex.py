@@ -435,4 +435,4 @@ if __name__ == '__main__':
     else:
         start_time = time.time()
         main(sys.argv[1])
-        print(f'--- {time.time() - start_time} seconds ---')
+        print(f'--- {time.time() - start_time:.3f} seconds ---')

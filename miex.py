@@ -86,7 +86,7 @@ def shexqnn2(x, ri, nang=1, doSA=False):
         ri : complex float
             complex refractive index
 
-        nang: int, optional, default = 1
+        nang : int, optional, default = 1
             half number of scattering angles theta in the intervall 0...pi/2 (equidistantly distributed).
 
         doSA : bool, optional, default = False
@@ -336,7 +336,9 @@ def scattering_matrix_elements(SA_1, SA_2):
         Returns
         -------
         S_11, S_12, S_33, S_34 : array_like
+            scattering matrix elements
     '''
+
     S_11 = 0.5 * (np.abs(SA_2)**2 + np.abs(SA_1)**2)
     S_12 = 0.5 * (np.abs(SA_2)**2 - np.abs(SA_1)**2)
     S_33 = np.real(SA_2 * np.conj(SA_1))
