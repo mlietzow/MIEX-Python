@@ -79,17 +79,17 @@ miex.shexqnn2(x=1.0, m=complex(1.5, 0.0), nang=91, doSA=True)
 | `nang`   | Half number of scattering angles in the intervall [0, 90]   | int     |
 | `doSA`   | Calculate scattering amplitude functions (`True` / `False`) | bool    |
 
-| Index | Variable      | Output Parameter              | Type                |
-| ----- | ------------- | ------------------------------| ------------------- |
-| 0     | $Q_{\rm ext}$ | Extinction efficiency         | float               |
-| 1     | $Q_{\rm abs}$ | Absorption efficiency         | float               |
-| 2     | $Q_{\rm sca}$ | Scattering efficiency         | float               |
-| 3     | $Q_{\rm bk}$  | Backscattering effiency       | float               |
-| 4     | $Q_{\rm pr}$  | Radiation pressure effiency   | float               |
-| 5     | $A$           | Single scattering albedo      | float               |
-| 6     | $g_{\rm sca}$ | Scattering assymetry factor   | float               |
-| 7     | $S_{1}$       | Scattering amplitude function | complex, array-like |
-| 8     | $S_{2}$       | Scattering amplitude function | complex, array-like |
+| Variable      | Output Parameter              | Type                | Index |
+| ------------- | ------------------------------| ------------------- | ----- |
+| $Q_{\rm ext}$ | Extinction efficiency         | float               | 0     |
+| $Q_{\rm abs}$ | Absorption efficiency         | float               | 1     |
+| $Q_{\rm sca}$ | Scattering efficiency         | float               | 2     |
+| $Q_{\rm bk}$  | Backscattering effiency       | float               | 3     |
+| $Q_{\rm pr}$  | Radiation pressure effiency   | float               | 4     |
+| $A$           | Single scattering albedo      | float               | 5     |
+| $g_{\rm sca}$ | Scattering assymetry factor   | float               | 6     |
+| $S_{1}$       | Scattering amplitude function | complex, array-like | 7     |
+| $S_{2}$       | Scattering amplitude function | complex, array-like | 8     |
 
 The scattering amplitude functions are an array with size `2*nang-1`.
 
