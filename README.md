@@ -17,6 +17,35 @@ python3 run_miex.py example2.input
 ```
 The results are stored in the `results` directory.
 
+The input file is organized as follows:
+| Parameter                                                                      | Type  |
+| ------------------------------------------------------------------------------ | ----- |
+| Real refractive index of the surrounding medium                                | float |
+| Number of wavelengths                                                          | int   |
+| Number of components                                                           | int   |
+| Name of the dust data files (lambda/n/k data)                                  |       |
+| &ensp; 1. component                                                            | str   |
+| &ensp; ...                                                                     | str   |
+| &ensp; n. component                                                            | str   |
+| Relative abundances of the different components [%]                            |       |
+| &ensp; 1. component                                                            | float |
+| &ensp; ...                                                                     | float |
+| &ensp; n. component                                                            | float |
+| Single grain size (1) or grain size distribution (2)                           | int   |
+| Grain size [micron] / Minimum grain size [micron]                              | float |
+| Maximum grain size [micron] <sup>1</sup>                                       | float |
+| Size distribution exponent <sup>1</sup>                                        | float |
+| Maximum grain size [micron] <sup>1</sup>                                       | float |
+| Number of size bins <sup>1</sup>                                               | int   |
+| Calculate scattering matrix elements (0: no / 1: yes)                          | int   |
+| Number of scattering angles in the interval [0, 180]; odd number! <sup>2</sup> | int   |
+| Project name for the output files                                              | str   |
+| Save results in separate files (0: no / 1: yes)                                | int   |
+
+<sup>1</sup> only for a grain size distribution, omit for single grain size;
+
+<sup>2</sup> only if scattering matrix elements are calculated, omit if not.
+
 
 ### Run miex via streamlit
 
