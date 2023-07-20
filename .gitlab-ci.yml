@@ -9,4 +9,4 @@ pytest:
         - pip3 install -r requirements.txt
 
     script:
-        - python3 -m pytest
+        - python3 -m pytest --verbosity=2
