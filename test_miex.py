@@ -195,53 +195,129 @@ class test_miex(unittest.TestCase):
         ri = complex(1.5, 0.1)
         x = 10.0
 
-        result = miex.shexqnn2(x=x, ri=ri)
+        result = miex.shexqnn2(x=x, ri=ri, nang=19, doSA=True)
 
         self.assertAlmostEqual(result[0], 2.459791, msg='incorrect Q_ext', delta=0.000001)
         self.assertAlmostEqual(result[1], 1.224646, msg='incorrect Q_abs', delta=0.000001)
         self.assertAlmostEqual(result[2], 1.235144, msg='incorrect Q_sca', delta=0.000001)
         self.assertAlmostEqual(result[6], 0.922350, msg='incorrect g_sca', delta=0.000001)
 
-        # TODO: compare intensity and degree of polarization
+        S_11, S_12, _, _ = miex.scattering_matrix_elements(result[7], result[8])
+        S_12 /= S_11
+
+        w_S_11 = np.array([
+             0.379171e+04, 0.300320e+04, 0.141624e+04, 0.313014e+03, 0.124235e+02, 0.296988e+02, 0.273164e+02, 0.112113e+02, 0.109517e+02, 0.607843e+01,
+             0.220902e+01, 0.632075e+01, 0.646946e+01, 0.225394e+01, 0.215826e+01, 0.392848e+01, 0.299433e+01, 0.163623e+01, 0.183556e+01, 0.209544e+01,
+             0.166228e+01, 0.137914e+01, 0.153058e+01, 0.147431e+01, 0.116521e+01, 0.135300e+01, 0.174359e+01, 0.136826e+01, 0.798073e+00, 0.974236e+00,
+             0.133396e+01, 0.141816e+01, 0.148012e+01, 0.126487e+01, 0.106733e+01, 0.172292e+01, 0.231818e+01
+             ])
+        w_S_12 = np.array([
+             0.0000,-0.0014,-0.0068,-0.0301,-0.6183,-0.2518,-0.2817,-0.7359,-0.6378,-0.5132,
+            -0.9235,-0.7194,-0.6077,-0.1744,-0.2426,-0.7454,-0.6373, 0.3019,-0.0893,-0.8614,
+            -0.6653, 0.2706, 0.0790,-0.7132,-0.8966, 0.1033, 0.3819,-0.0370,-0.6271, 0.0599,
+             0.3753, 0.1218,-0.2643,-0.6463,-0.8175,-0.2177, 0.0000
+             ])
+        
+        for i, j in zip(S_11, w_S_11):
+            self.assertAlmostEqual(i/j, 1.0, msg=f'incorrect S_11, {i} != {j}', delta=0.00001)
+        for i, j in zip(S_12, w_S_12):
+            self.assertAlmostEqual(i, j, msg='incorrect S_12', delta=0.0001)
 
     def test_w_6(self):
         ri = complex(1.5, 0.1)
         x = 100.0
 
-        result = miex.shexqnn2(x=x, ri=ri)
+        result = miex.shexqnn2(x=x, ri=ri, nang=19, doSA=True)
 
         self.assertAlmostEqual(result[0], 2.089822, msg='incorrect Q_ext', delta=0.000001)
         self.assertAlmostEqual(result[1], 0.957688, msg='incorrect Q_abs', delta=0.000001)
         self.assertAlmostEqual(result[2], 1.132134, msg='incorrect Q_sca', delta=0.000001)
         self.assertAlmostEqual(result[6], 0.950392, msg='incorrect g_sca', delta=0.000001)
 
-        # TODO: compare intensity and degree of polarization
+        S_11, S_12, _, _ = miex.scattering_matrix_elements(result[7], result[8])
+        S_12 /= S_11
+
+        w_S_11 = np.array([
+             0.273645e+08, 0.911574e+05, 0.130172e+05, 0.314304e+04, 0.121824e+04, 0.911319e+03, 0.801673e+03, 0.629347e+03, 0.465786e+03, 0.370932e+03,
+             0.317391e+03, 0.269848e+03, 0.230451e+03, 0.202758e+03, 0.180401e+03, 0.162813e+03, 0.149203e+03, 0.138475e+03, 0.130113e+03, 0.123599e+03,
+             0.118559e+03, 0.114659e+03, 0.111687e+03, 0.109437e+03, 0.107749e+03, 0.106503e+03, 0.105600e+03, 0.104961e+03, 0.104521e+03, 0.104229e+03, 
+             0.104044e+03, 0.103935e+03, 0.103877e+03, 0.103850e+03, 0.103840e+03, 0.103837e+03, 0.103837e+03
+             ])
+        w_S_12 = np.array([
+             0.0000,-0.0247,-0.0848,-0.2375,-0.4798,-0.5484,-0.5537,-0.6268,-0.7490,-0.8418,
+            -0.8905,-0.9395,-0.9797,-0.9960,-0.9944,-0.9750,-0.9395,-0.8885,-0.8273,-0.7576,
+            -0.6831,-0.6072,-0.5316,-0.4586,-0.3897,-0.3257,-0.2673,-0.2148,-0.1684,-0.1278,
+            -0.0932,-0.0643,-0.0409,-0.0229,-0.0101,-0.0025, 0.0000
+             ])
+        
+        for i, j in zip(S_11, w_S_11):
+            self.assertAlmostEqual(i/j, 1.0, msg=f'incorrect S_11, {i} != {j}', delta=0.00001)
+        for i, j in zip(S_12, w_S_12):
+            self.assertAlmostEqual(i, j, msg='incorrect S_12', delta=0.0001)
 
     def test_w_7(self):
         ri = complex(1.5, 0.1)
         x = 1000.0
 
-        result = miex.shexqnn2(x=x, ri=ri)
+        result = miex.shexqnn2(x=x, ri=ri, nang=19, doSA=True)
 
         self.assertAlmostEqual(result[0], 2.019703, msg='incorrect Q_ext', delta=0.000001)
         self.assertAlmostEqual(result[1], 0.912770, msg='incorrect Q_abs', delta=0.000001)
         self.assertAlmostEqual(result[2], 1.106932, msg='incorrect Q_sca', delta=0.000001)
         self.assertAlmostEqual(result[6], 0.950880, msg='incorrect g_sca', delta=0.000001)
 
-        # TODO: compare intensity and degree of polarization
+        S_11, S_12, _, _ = miex.scattering_matrix_elements(result[7], result[8])
+        S_12 /= S_11
+
+        w_S_11 = np.array([
+             0.255002e+12, 0.103489e+07, 0.270449e+06, 0.145265e+06, 0.101955e+06, 0.803929e+05, 0.646676e+05, 0.528211e+05, 0.436516e+05, 0.364909e+05,
+             0.308618e+05, 0.264252e+05, 0.229245e+05, 0.201609e+05, 0.179799e+05, 0.162601e+05, 0.149061e+05, 0.138426e+05, 0.130097e+05, 0.123601e+05,
+             0.118559e+05, 0.114671e+05, 0.111696e+05, 0.109441e+05, 0.107752e+05, 0.106505e+05, 0.105601e+05, 0.104961e+05, 0.104520e+05, 0.104227e+05,
+             0.104042e+05, 0.103933e+05, 0.103874e+05, 0.103846e+05, 0.103836e+05, 0.103834e+05, 0.103834e+05
+             ])
+        w_S_12 = np.array([
+             0.0000,-0.0682,-0.1681,-0.2830,-0.3931,-0.4861,-0.5789,-0.6682,-0.7517,-0.8267,
+            -0.8909,-0.9417,-0.9765,-0.9939,-0.9928,-0.9737,-0.9379,-0.8878,-0.8265,-0.7571,
+            -0.6829,-0.6069,-0.5315,-0.4586,-0.3897,-0.3258,-0.2674,-0.2149,-0.1684,-0.1279,
+            -0.0932,-0.0643,-0.0409,-0.0229,-0.0101,-0.0025, 0.0000
+             ])
+        
+        for i, j in zip(S_11, w_S_11):
+            self.assertAlmostEqual(i/j, 1.0, msg=f'incorrect S_11, {i} != {j}', delta=0.00001)
+        for i, j in zip(S_12, w_S_12):
+            self.assertAlmostEqual(i, j, msg='incorrect S_12', delta=0.0001)
     
     def test_w_8(self):
         ri = complex(1.5, 0.1)
         x = 5000.0
 
-        result = miex.shexqnn2(x=x, ri=ri)
+        result = miex.shexqnn2(x=x, ri=ri, nang=19, doSA=True)
 
         self.assertAlmostEqual(result[0], 2.006775, msg='incorrect Q_ext', delta=0.000001)
         self.assertAlmostEqual(result[1], 0.907582, msg='incorrect Q_abs', delta=0.000001)
         self.assertAlmostEqual(result[2], 1.099193, msg='incorrect Q_sca', delta=0.000001)
         self.assertAlmostEqual(result[6], 0.950650, msg='incorrect g_sca', delta=0.000001)
 
-        # TODO: compare intensity and degree of polarization
+        S_11, S_12, _, _ = miex.scattering_matrix_elements(result[7], result[8])
+        S_12 /= S_11
+
+        w_S_11 = np.array([
+             0.157315e+15, 0.772728e+07, 0.417917e+07, 0.311291e+07, 0.245545e+07, 0.197572e+07, 0.160555e+07, 0.131668e+07, 0.109011e+07, 0.911909e+06,
+             0.771474e+06, 0.660667e+06, 0.573177e+06, 0.504089e+06, 0.449555e+06, 0.406550e+06, 0.372691e+06, 0.346095e+06, 0.325266e+06, 0.309020e+06,
+             0.296412e+06, 0.286689e+06, 0.279248e+06, 0.273608e+06, 0.269384e+06, 0.266266e+06, 0.264005e+06, 0.262403e+06, 0.261300e+06, 0.260568e+06,
+             0.260105e+06, 0.259832e+06, 0.259684e+06, 0.259616e+06, 0.259591e+06, 0.259585e+06, 0.259585e+06
+             ])
+        w_S_12 = np.array([
+             0.0000,-0.1103,-0.1975,-0.2927,-0.3902,-0.4856,-0.5788,-0.6680,-0.7513,-0.8264,
+            -0.8906,-0.9414,-0.9763,-0.9936,-0.9926,-0.9735,-0.9378,-0.8878,-0.8264,-0.7570,
+            -0.6829,-0.6069,-0.5315,-0.4586,-0.3897,-0.3258,-0.2674,-0.2149,-0.1684,-0.1279,
+            -0.0932,-0.0643,-0.0409,-0.0229,-0.0101,-0.0025, 0.0000
+             ])
+        
+        for i, j in zip(S_11, w_S_11):
+            self.assertAlmostEqual(i/j, 1.0, msg=f'incorrect S_11, {i} != {j}', delta=0.00001)
+        for i, j in zip(S_12, w_S_12):
+            self.assertAlmostEqual(i, j, msg='incorrect S_12', delta=0.0001)
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
