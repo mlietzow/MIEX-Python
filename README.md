@@ -72,12 +72,12 @@ To calculate the efficiency factors and scattering amplitude functions (optional
 miex.shexqnn2(x=1.0, m=complex(1.5, 0.0), nang=91, doSA=True)
 ```
 
-| Variable | Input Parameter                                             | Type    |
-| -------- | ----------------------------------------------------------- | ------- |
-| `x`      | Size parameter                                              | float   |
-| `m`      | Complex refractive index                                    | complex |
-| `nang`   | Half number of scattering angles in the intervall [0, 90]   | int     |
-| `doSA`   | Calculate scattering amplitude functions (`True` / `False`) | bool    |
+| Variable     | Input Parameter                                           | Type           |
+| ------------ | --------------------------------------------------------- | -------------- |
+| `x`          | Size parameter                                            | float          |
+| `m`          | Complex refractive index                                  | complex        |
+| `nang=1`     | Half number of scattering angles in the intervall [0, 90] | int, optional  |
+| `doSA=False` | Calculate scattering amplitude functions                  | bool, optional |
 
 | Variable      | Output Parameter              | Type                | Index |
 | ------------- | ------------------------------| ------------------- | ----- |

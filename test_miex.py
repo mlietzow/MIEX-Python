@@ -2,9 +2,9 @@ import miex
 import numpy as np
 import unittest
 
+
 class test_miex(unittest.TestCase):
-    '''
-        compare results by
+    '''compare results by
         C.F.Bohren & D.R.Huffman 'Absorption and Scattering of Light by Small Particles' (1998)
         https://doi.org/10.1002/9783527618156
         (see Appendix A, page 482)
@@ -13,6 +13,7 @@ class test_miex(unittest.TestCase):
         https://doi.org/10.5065/D6ZP4414
         (see Appendix, A22)
     '''
+
 
     def test_bh(self):
         ri = complex(1.55, 0)
@@ -63,6 +64,7 @@ class test_miex(unittest.TestCase):
         for i, j in zip(S_34, bh_S_34):
             self.assertAlmostEqual(i, j, msg='incorrect S_34', delta=0.000001)
 
+
     def test_w_1(self):
         ri = complex(1.5, 0)
         x = 10.0
@@ -94,6 +96,7 @@ class test_miex(unittest.TestCase):
             self.assertAlmostEqual(i/j, 1.0, msg=f'incorrect S_11, {i} != {j}', delta=0.00001)
         for i, j in zip(S_12, w_S_12):
             self.assertAlmostEqual(i, j, msg='incorrect S_12', delta=0.0001)
+
 
     def test_w_2(self):
         ri = complex(1.5, 0)
@@ -127,6 +130,7 @@ class test_miex(unittest.TestCase):
         for i, j in zip(S_12, w_S_12):
             self.assertAlmostEqual(i, j, msg='incorrect S_12', delta=0.0001)
 
+
     def test_w_3(self):
         ri = complex(1.5, 0)
         x = 1000.0
@@ -159,6 +163,7 @@ class test_miex(unittest.TestCase):
         for i, j in zip(S_12, w_S_12):
             self.assertAlmostEqual(i, j, msg='incorrect S_12', delta=0.0001)
 
+
     def test_w_4(self):
         ri = complex(1.5, 0)
         x = 5000.0
@@ -190,7 +195,8 @@ class test_miex(unittest.TestCase):
             self.assertAlmostEqual(i/j, 1.0, msg=f'incorrect S_11, {i} != {j}', delta=0.00001)
         for i, j in zip(S_12, w_S_12):
             self.assertAlmostEqual(i, j, msg='incorrect S_12', delta=0.0001)
-    
+
+
     def test_w_5(self):
         ri = complex(1.5, 0.1)
         x = 10.0
@@ -222,6 +228,7 @@ class test_miex(unittest.TestCase):
             self.assertAlmostEqual(i/j, 1.0, msg=f'incorrect S_11, {i} != {j}', delta=0.00001)
         for i, j in zip(S_12, w_S_12):
             self.assertAlmostEqual(i, j, msg='incorrect S_12', delta=0.0001)
+
 
     def test_w_6(self):
         ri = complex(1.5, 0.1)
@@ -255,6 +262,7 @@ class test_miex(unittest.TestCase):
         for i, j in zip(S_12, w_S_12):
             self.assertAlmostEqual(i, j, msg='incorrect S_12', delta=0.0001)
 
+
     def test_w_7(self):
         ri = complex(1.5, 0.1)
         x = 1000.0
@@ -286,7 +294,8 @@ class test_miex(unittest.TestCase):
             self.assertAlmostEqual(i/j, 1.0, msg=f'incorrect S_11, {i} != {j}', delta=0.00001)
         for i, j in zip(S_12, w_S_12):
             self.assertAlmostEqual(i, j, msg='incorrect S_12', delta=0.0001)
-    
+
+
     def test_w_8(self):
         ri = complex(1.5, 0.1)
         x = 5000.0
@@ -318,6 +327,7 @@ class test_miex(unittest.TestCase):
             self.assertAlmostEqual(i/j, 1.0, msg=f'incorrect S_11, {i} != {j}', delta=0.00001)
         for i, j in zip(S_12, w_S_12):
             self.assertAlmostEqual(i, j, msg='incorrect S_12', delta=0.0001)
+
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
