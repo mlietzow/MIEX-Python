@@ -1,6 +1,7 @@
 # MIEX for Python
 
 [![arXiv](https://img.shields.io/badge/arXiv-astro--ph%2F0406118-red)](https://arxiv.org/abs/astro-ph/0406118)
+[![ascl](https://img.shields.io/badge/ascl-1810.019-blue.svg?colorB=262255)](https://ascl.net/1810.019)
 [![bibcode](https://img.shields.io/badge/bibcode-2004CoPhC.162..113W-blue)](https://ui.adsabs.harvard.edu/abs/2004CoPhC.162..113W)
 [![doi](https://img.shields.io/badge/doi-10.1016%2Fj.cpc.2004.06.070-yellow)](https://doi.org/10.1016/j.cpc.2004.06.070)
 
@@ -121,3 +122,8 @@ The function returns the scattering matrix elements $S_{11}$​, $S_{12}$​, $S
 ```bash
 python3 test_miex.py
 ```
+
+
+## Copyright
+
+The original source code written in `FORTRAN90` is distributed under the [CPC license](https://www.elsevier.com/about/policies/open-access-licenses/elsevier-user-license/cpc-license).
