@@ -145,13 +145,23 @@ if run_miex:
                 st.error('Error: Dust data file missing!')
                 st.stop()
             w, n, k = np.loadtxt(fnames[icomp], unpack=True, comments='#', converters=conv)
-            if nlam <= len(w):
-                wavelength = w[:nlam]
-                ri_real[icomp] = n[:nlam]
-                ri_imag[icomp] = k[:nlam]
+            
+            if isinstance(w, float):
+                if nlam == 1:
+                    wavelength = np.array([w])
+                    ri_real[icomp] = np.array([n])
+                    ri_imag[icomp] = np.array([k])
+                else:
+                    st.error('Error: Number of defined wavelengths is larger than the number of wavelengths given in the file')
+                    st.stop()
             else:
-                st.error('Error: Number of defined wavelengths is larger than the number of wavelengths given in the file')
-                st.stop()
+                if nlam <= len(w):
+                    wavelength = w[:nlam]
+                    ri_real[icomp] = n[:nlam]
+                    ri_imag[icomp] = k[:nlam]
+                else:
+                    st.error('Error: Number of defined wavelengths is larger than the number of wavelengths given in the file')
+                    st.stop()
 
     # define radial step width
     radminlog = np.log10(radmin)
