@@ -1,11 +1,11 @@
 # MIEX for Python
 
-[![arXiv](https://img.shields.io/badge/arXiv-astro--ph%2F0406118-red)](https://arxiv.org/abs/astro-ph/0406118)
-[![ascl](https://img.shields.io/badge/ascl-1810.019-blue.svg?colorB=262255)](https://ascl.net/1810.019)
-[![bibcode](https://img.shields.io/badge/bibcode-2004CoPhC.162..113W-blue)](https://ui.adsabs.harvard.edu/abs/2004CoPhC.162..113W)
-[![doi](https://img.shields.io/badge/doi-10.1016%2Fj.cpc.2004.06.070-yellow)](https://doi.org/10.1016/j.cpc.2004.06.070)
+[![arXiv](https://img.shields.io/badge/arXiv-astro--ph%2F0406118-b31b1b)](https://arxiv.org/abs/astro-ph/0406118)
+[![ascl](https://img.shields.io/badge/ascl-1810.019-262255)](https://ascl.net/1810.019)
+[![bibcode](https://img.shields.io/badge/bibcode-2004CoPhC.162..113W-1c459b)](https://ui.adsabs.harvard.edu/abs/2004CoPhC.162..113W)
+[![doi](https://img.shields.io/badge/doi-10.1016%2Fj.cpc.2004.06.070-fab70c)](https://doi.org/10.1016/j.cpc.2004.06.070)
 
-is a Mie scattering code for large grains.
+is a Mie scattering code for large grains written in Python and based on **miex** [(Wolf & Voshchinnikov 2004)](https://ui.adsabs.harvard.edu/abs/2004CoPhC.162..113W).
 
 
 ## Requirements
@@ -18,7 +18,7 @@ To check the current version or to install the packages, run:
 
 ```bash
 python3 --version
-pip3 install numba numpy
+pip3 install -r requirements.txt
 ```
 
 ## Run miex
@@ -29,6 +29,7 @@ pip3 install numba numpy
 python3 run_miex.py example1.input
 python3 run_miex.py example2.input
 ```
+
 The results are stored in the `results` directory.
 
 The input file is organized as follows:
@@ -64,10 +65,13 @@ The input file is organized as follows:
 ### Run miex via streamlit
 
 [miex_app.py](miex_app.py) can be used as a simple Streamlit web app. Install streamlit
+
 ```bash
 pip3 install streamlit
 ```
+
 and start the web app:
+
 ```bash
 streamlit run miex_app.py
 ```
@@ -82,6 +86,7 @@ python3 miex_example.py
 ```
 
 To calculate the efficiency factors and scattering amplitude functions (optionally), use e.g.,
+
 ```python
 miex.shexqnn2(x=1.0, m=complex(1.5, 0.0), nang=91, doSA=True)
 ```
@@ -108,9 +113,11 @@ miex.shexqnn2(x=1.0, m=complex(1.5, 0.0), nang=91, doSA=True)
 The scattering amplitude functions are an array with size `2*nang-1`.
 
 To calculate the scattering matrix elements, use
+
 ```python
 miex.scattering_matrix_elements(S1, S2)
 ```
+
 where $S_1$ and $S_2$​ are the scattering amplitude functions.
 The function returns the scattering matrix elements $S_{11}$​, $S_{12}$​, $S_{33}$​, $S_{34}$​ (in this order).
 
