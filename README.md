@@ -43,23 +43,25 @@ The input file is organized as follows:
 | &ensp; 1. component                                                            | str   |
 | &ensp; ...                                                                     | str   |
 | &ensp; n. component                                                            | str   |
-| Relative abundances of the different components [%]                            |       |
+| Relative abundances of the different components [%] <sup>1</sup>               |       |
 | &ensp; 1. component                                                            | float |
 | &ensp; ...                                                                     | float |
 | &ensp; n. component                                                            | float |
 | Single grain size (1) or grain size distribution (2)                           | int   |
 | Grain size [micron] / Minimum grain size [micron]                              | float |
-| Maximum grain size [micron] <sup>1</sup>                                       | float |
-| Size distribution exponent <sup>1</sup>                                        | float |
-| Number of size bins <sup>1</sup>                                               | int   |
+| Maximum grain size [micron] <sup>2</sup>                                       | float |
+| Size distribution exponent <sup>2</sup>                                        | float |
+| Number of size bins <sup>2</sup>                                               | int   |
 | Calculate scattering matrix elements (0: no / 1: yes)                          | int   |
-| Number of scattering angles in the interval [0, 180]; odd number! <sup>2</sup> | int   |
+| Number of scattering angles in the interval [0, 180]; odd number! <sup>3</sup> | int   |
 | Project name for the output files                                              | str   |
 | Save results in separate files (0: no / 1: yes)                                | int   |
 
-<sup>1</sup> only for a grain size distribution, omit for single grain size;
+<sup>1</sup> only for multiple compositions, omit for single composition;
 
-<sup>2</sup> only if scattering matrix elements are calculated, omit if not.
+<sup>2</sup> only for a grain size distribution, omit for single grain size;
+
+<sup>3</sup> only if scattering matrix elements are calculated, omit if not.
 
 
 ### Run miex via streamlit
