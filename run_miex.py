@@ -191,9 +191,9 @@ def main(input_filename):
 
         for icomp in range(ncomp):
             for irad in range(nrad):
-                # show progress every 1 per cent
+                # show progress every 10 per cent
                 counter += 1
-                if int(counter % ((nlam * ncomp * nrad) / 100)) == 0:
+                if int(counter % ((nlam * ncomp * nrad) / 10)) == 0:
                     print(int(counter / (nlam * ncomp * nrad) * 100), '%', end='\r')
 
                 # current radius / radius interval
