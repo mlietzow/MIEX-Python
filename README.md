@@ -7,6 +7,22 @@
 
 is a Mie scattering code for large grains written in Python and based on **miex** [(Wolf & Voshchinnikov 2004)](https://ui.adsabs.harvard.edu/abs/2004CoPhC.162..113W).
 
+The following quantities for
+
+1. single grain sizes / chemical components and
+2. mixtures of chemically different grains with a size distributions
+
+can be calulated:
+
+- Scattering matrix elements $S_{11}$, $S_{12}$, $S_{33}$, and $S_{34}$,
+- Extinction effiency factor ($Q_\mathrm{ext}$) and Extinction cross section ($C_\mathrm{ext}$),
+- Scattering effiency factor ($Q_\mathrm{sca}$) and Scattering cross section ($C_\mathrm{sca}$),
+- Absorption effiency factor ($Q_\mathrm{abs}$) and Absorption cross section ($C_\mathrm{abs}$),
+- Backscattering effiency factor ($Q_\mathrm{bk}$) and Backscattering cross section ($C_\mathrm{bk}$),
+- Radiation pressure effiency factor ($Q_\mathrm{pr}$),
+- Albedo,
+- Scattering assymetry factor ($g$).
+
 
 ## Requirements
 
