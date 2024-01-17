@@ -149,6 +149,22 @@ python3 test_miex.py
 ```
 
 
+## Project structure
+
+    .
+    ├── ri-data                                  # Input data used by miex
+    ├── README.me
+    ├── example1.input                           # Exemplary input file
+    ├── example2.input                           # Exemplary input file
+    ├── miex.py                                  # Source code of miex
+    ├── miex_app.py                              # Python script to run miex via streamlit
+    ├── miex_example.py                          # Exemplary python script on how to use miex in a user build python code
+    ├── miex_notebook.ipynb                      # Jupyter notebook on how to use miex
+    ├── requirements.txt                         # Required python packages for miex
+    ├── run_miex.py                              # Python script to run miex with input files
+    └── test_miex.py                             # Python script for test purposes
+
+
 ## Copyright
 
 The original source code written in `FORTRAN90` is distributed under the [CPC license](https://www.elsevier.com/about/policies/open-access-licenses/elsevier-user-license/cpc-license).
