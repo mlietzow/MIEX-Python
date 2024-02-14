@@ -7,7 +7,7 @@ from numba import njit
 #                    _________________________________________________________________________________
 #                    Contact information:   wolf@astrophysik.uni-kiel.de (Sebastian Wolf)
 #                                           rbrunngraeber@astrophysik.uni-kiel.de (Robert Brunngräber)
-#                                           mlietzow@astrophysik.uni-kiel.de (Moritz Lietzow)
+#                                           mlietzow@astrophysik.uni-kiel.de (Moritz Lietzow-Sinjen)
 # ====================================================================================================
 # GENERAL CODE DESCRIPTION
 # ------------------------
@@ -26,13 +26,13 @@ from numba import njit
 #   * Backscattering effiency factor     (Q_bk)  & Backscattering cross section (C_bk)
 #   * Radiation pressure effiency factor (Q_pr)
 #   * Albedo
-#   * Scattering assymetry factor (g).
+#   * Scattering assymetry factor (g)
 #
 # ____________________________________________________________________________________________________
 # The optical data of the grains have to be provided in files with the following tabular form
-#   * first  row: wavelength [micron]
-#   * second row: n (=real[ri])
-#   * second row: k (=imag[ri]).
+#   * first  column: wavelength [micron]
+#   * second column: n (=real[ri])
+#   * third  column: k (=imag[ri]).
 #
 # Rem.: For astrophysical applications, such tables can be found, e.g., at
 #       http://www.astro.uni-jena.de/Users/database/entry.html
@@ -87,7 +87,7 @@ def shexqnn2(x, ri, nang=1, doSA=False, nterm=2e7, eps=1.0e-20, xmin=1.0e-06):
             complex refractive index
 
         nang : int, optional, default = 1
-            half number of scattering angles theta in the intervall 0...pi/2 (equidistantly distributed).
+            half number of scattering angles theta in the intervall 0...pi/2 (equidistantly distributed)
 
         doSA : bool, optional, default = False
             calculation of the scattering amplitudes
