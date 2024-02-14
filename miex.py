@@ -73,7 +73,7 @@ def aa2(ax, ri, num, ru):
 
 
 @njit(cache=True)
-def shexqnn2(x, ri, nang=1, doSA=False):
+def shexqnn2(x, ri, nang=1, doSA=False, nterm=2e7, eps=1.0e-20, xmin=1.0e-06):
     ''' Derive quantities for a single size parameter and chemical composition.
         This routine is based on the routine 'shexqnn' published by
         N.V.Voshchinnikov: 'Optics of Cosmic Dust', Astrophysics and Space Physics Review 12, 1 (2002)
@@ -91,6 +91,15 @@ def shexqnn2(x, ri, nang=1, doSA=False):
 
         doSA : bool, optional, default = False
             calculation of the scattering amplitudes
+
+        nterm : int, optional, default = 2e7
+            Maximum number of terms to be considered
+        
+        eps : float, optional, default = 1.0e-20
+            Accuracy to be achieved
+
+        xmin : float, optional, default = 1.0e-06
+            Minimum size parameter
 
         Returns
         -------
@@ -113,7 +122,7 @@ def shexqnn2(x, ri, nang=1, doSA=False):
             single scattering albedo
 
         6:  g_sca : float
-            scattering assymetry factor
+            scattering asymmetry factor
 
         7:  SA_1 : ndarray
             scattering amplitude function. The length of the array is 2*nang-1
@@ -128,13 +137,6 @@ def shexqnn2(x, ri, nang=1, doSA=False):
         ValueError
             if somehow calculations result in NaN
     '''
-
-    # Maximum number of terms to be considered
-    nterm = 20000000
-    # Accuracy to be achieved
-    eps = 1.0e-20
-    # Minimum size parameter
-    xmin = 1.0e-06
 
     fact = np.array([1.0, 1.0e+250])
     factor = 1.0e+250
@@ -159,7 +161,7 @@ def shexqnn2(x, ri, nang=1, doSA=False):
         num = int(1.005 * y + 50.5)
 
     if num > nterm:
-        raise Exception(f'Maximum number of terms: {nterm}, number of terms required: {num}, increase default value of the variable \'nterm\'')
+        raise Exception(f'Maximum number of terms: {nterm}, number of terms required: {num}, increase default value of the argument \'nterm\'')
     
     # Logarithmic derivative to Bessel function (complex argument)
     ru = np.zeros(num, dtype=np.complex128)
