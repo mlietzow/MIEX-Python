@@ -37,7 +37,7 @@ from numba import njit
 # Rem.: For astrophysical applications, such tables can be found, e.g., at
 #       http://www.astro.uni-jena.de/Users/database/entry.html
 #       ('Jena-Petersburg Database of Optical Constants'). See, also,
-#       N.V.Voshchinnikov: 'Optics of Cosmic Dust', Astrophysics and Space Physics Review 12,  1 (2002)
+#       N.V.Voshchinnikov: 'Optics of Cosmic Dust', Astrophysics and Space Physics Review 12, 1 (2002)
 #       for further references.
 #
 # ====================================================================================================
@@ -68,7 +68,7 @@ def aa2(ax, ri, num, ru):
     s = ax / ri
     ru[num-1] = (num + 1.0) * s
 
-    for i in range(num-1, 0, -1):
+    for i in range(num - 1, 0, -1):
         ru[i-1] = (i + 1.0) * s - 1.0 / (ru[i] + (i + 1.0) * s)
 
 
@@ -170,8 +170,6 @@ def shexqnn2(x, ri, nang=1, doSA=False, nterm=2e7, eps=1.0e-20, xmin=1.0e-06):
     # ------------------------------------------------------------------------------------------
     # FIRST TERM
     # ------------------------------------------------------------------------------------------
-    # Initialize term counter
-    iterm = 1
 
     # Bessel functions
     ass = 1.0 / np.sqrt( 0.5 * np.pi * ax )
@@ -215,19 +213,16 @@ def shexqnn2(x, ri, nang=1, doSA=False, nterm=2e7, eps=1.0e-20, xmin=1.0e-06):
         fpi0 = np.zeros(nang2)
         fpi1 = np.ones(nang2)
 
-        fac = (2.0 * iterm + 1.0) / (iterm * (iterm + 1.0))
-        ftau = iterm * mu * fpi1 - (iterm + 1.0) * fpi0
+        fac = 0.5 * (2.0 + 1.0)
+        ftau = mu * fpi1 - 2.0 * fpi0
 
         SA_1 += fac * (ra0 * fpi1 + rb0 * ftau)
         SA_2 += fac * (ra0 * ftau + rb0 * fpi1)
 
         fpi1_tmp = fpi1
-        fpi1 = fpi1 * mu * (2.0 + 1.0 / iterm)
-        fpi1 = fpi1 - fpi0 * (1.0 + 1.0 / iterm)
+        fpi1 = fpi1 * mu * (2.0 + 1.0)
+        fpi1 = fpi1 - fpi0 * (1.0 + 1.0)
         fpi0 = fpi1_tmp
-
-    # start value for the next terms
-    # iterm += 1
 
     # ------------------------------------------------------------------------------------------
     # 2., 3., ... num
@@ -306,11 +301,6 @@ def shexqnn2(x, ri, nang=1, doSA=False, nterm=2e7, eps=1.0e-20, xmin=1.0e-06):
             fpi1 = fpi1 * mu * (2.0 + 1.0 / iterm)
             fpi1 = fpi1 - fpi0 * (1.0 + 1.0 / iterm)
             fpi0 = fpi1_tmp
-
-        # iterm += 1
-
-        # if iterm == num:
-        #     break
 
     # efficiency factors (final calculations)
     Q_ext *= b
