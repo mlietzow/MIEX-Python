@@ -213,15 +213,15 @@ def shexqnn2(x, ri, nang=1, doSA=False, nterm=2e7, eps=1.0e-20, xmin=1.0e-06):
         fpi0 = np.zeros(nang2)
         fpi1 = np.ones(nang2)
 
-        fac = 0.5 * (2.0 + 1.0)
+        fac = 1.5
         ftau = mu * fpi1 - 2.0 * fpi0
 
         SA_1 += fac * (ra0 * fpi1 + rb0 * ftau)
         SA_2 += fac * (ra0 * ftau + rb0 * fpi1)
 
         fpi1_tmp = fpi1
-        fpi1 = fpi1 * mu * (2.0 + 1.0)
-        fpi1 = fpi1 - fpi0 * (1.0 + 1.0)
+        fpi1 = fpi1 * mu * 3.0
+        fpi1 = fpi1 - fpi0 * 2.0
         fpi0 = fpi1_tmp
 
     # ------------------------------------------------------------------------------------------
@@ -229,7 +229,6 @@ def shexqnn2(x, ri, nang=1, doSA=False, nterm=2e7, eps=1.0e-20, xmin=1.0e-06):
     # ------------------------------------------------------------------------------------------
     z = -1.0
 
-    # while True:
     for iterm in range(2, num + 1):
         an = an + 2.0
         an2 = an - 2.0
