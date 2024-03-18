@@ -45,7 +45,7 @@ else:
             fnames.append(st.file_uploader(f'Choose {icomp+1}. component:', key=f'file{icomp}'))
         with col2:
             abun[icomp] = st.number_input(f'Relative abundance of the {icomp+1}. component [%]:', value=100.0, format='%f', step=1.0, key=f'abun{icomp}')
-    
+
     abun /= 100.0
 
 st.divider()
@@ -68,8 +68,8 @@ else:
         'Distribution type',
         options=[r'Power law', r'Power law with exponential decay'],
         horizontal=True)
-    st.caption(r'Power law: $n(r) \propto n^q$')
-    st.caption(r'Power law with exponential decay: $n(r) \propto n^q \times \exp(-r / p)$')
+    st.caption(r'Power law: $n(r) \propto r^q$')
+    st.caption(r'Power law with exponential decay: $n(r) \propto r^q \times \exp(-r / p)$')
     with col1:
         radmin = st.number_input(r'Minimum grain size $r_{\rm min}$ [micron]:', value=0.01, format='%f', step=0.1)
         exponent = st.number_input(r'Size distribtion exponent $q$', value=-3.5, format='%f', step=0.1)
@@ -145,7 +145,7 @@ if run_miex:
                 st.error('Error: Dust data file missing!')
                 st.stop()
             w, n, k = np.loadtxt(fnames[icomp], unpack=True, comments='#', converters=conv)
-            
+
             if isinstance(w, float):
                 if nlam == 1:
                     wavelength = np.array([w])
@@ -394,7 +394,7 @@ if run_miex:
 
             ax[2].plot(wavelength, albedo, label='single scattering albedo')
             ax[2].plot(wavelength, g_sca, label='scattering assymetry factor')
-            
+
             # ax[2].set_yscale('log')
             ax[2].set_xlabel('wavelength [micron]')
             ax[2].set_xscale('log')
