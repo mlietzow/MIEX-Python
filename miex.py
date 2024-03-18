@@ -132,7 +132,7 @@ def shexqnn2(x, ri, nang=1, doSA=False, nterm=2e7, eps=1.0e-20, xmin=1.0e-06):
 
         Raises
         ------
-        Exception
+        ValueError
             if Mie scattering limit is exceeded or if required terms exceed maximum number of terms
         ValueError
             if somehow calculations result in NaN
@@ -142,7 +142,7 @@ def shexqnn2(x, ri, nang=1, doSA=False, nterm=2e7, eps=1.0e-20, xmin=1.0e-06):
     factor = 1.0e+250
 
     if x <= xmin:
-        raise Exception('Mie scattering limit exceeded, current size parameter:', x)
+        raise ValueError('Mie scattering limit', xmin, 'exceeded, current size parameter:', x, 'decrease default value of the argument \'xmin\'')
     
     ax = 1.0 / x
     b = 2.0 * ax**2
@@ -161,7 +161,7 @@ def shexqnn2(x, ri, nang=1, doSA=False, nterm=2e7, eps=1.0e-20, xmin=1.0e-06):
         num = int(1.005 * y + 50.5)
 
     if num > nterm:
-        raise Exception(f'Maximum number of terms: {nterm}, number of terms required: {num}, increase default value of the argument \'nterm\'')
+        raise ValueError('Maximum number of terms:', nterm, 'number of terms required: ', num, 'increase default value of the argument \'nterm\'')
     
     # Logarithmic derivative to Bessel function (complex argument)
     ru = np.zeros(num, dtype=np.complex128)
