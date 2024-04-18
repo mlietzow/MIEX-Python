@@ -82,7 +82,7 @@ def shexqnn2(x, ri, nang=1, doSA=False, nterm=2e7, eps=1.0e-20, xmin=1.0e-06):
         ----------
         x : float
             size parameter = 2 * pi * radius / wavelength
-        
+
         ri : complex float
             complex refractive index
 
@@ -94,7 +94,7 @@ def shexqnn2(x, ri, nang=1, doSA=False, nterm=2e7, eps=1.0e-20, xmin=1.0e-06):
 
         nterm : int, optional, default = 2e7
             Maximum number of terms to be considered
-        
+
         eps : float, optional, default = 1.0e-20
             Accuracy to be achieved
 
@@ -142,8 +142,9 @@ def shexqnn2(x, ri, nang=1, doSA=False, nterm=2e7, eps=1.0e-20, xmin=1.0e-06):
     factor = 1.0e+250
 
     if x <= xmin:
-        raise ValueError('Mie scattering limit', xmin, 'exceeded, current size parameter:', x, 'decrease default value of the argument \'xmin\'')
-    
+        raise ValueError('Mie scattering limit', xmin, 'exceeded, current size parameter:',
+                         x, 'decrease default value of the argument \'xmin\'')
+
     ax = 1.0 / x
     b = 2.0 * ax**2
     ss = complex(0.0, 0.0)
@@ -161,8 +162,9 @@ def shexqnn2(x, ri, nang=1, doSA=False, nterm=2e7, eps=1.0e-20, xmin=1.0e-06):
         num = int(1.005 * y + 50.5)
 
     if num > nterm:
-        raise ValueError('Maximum number of terms:', nterm, 'number of terms required: ', num, 'increase default value of the argument \'nterm\'')
-    
+        raise ValueError('Maximum number of terms:', nterm, 'number of terms required: ',
+                         num, 'increase default value of the argument \'nterm\'')
+
     # Logarithmic derivative to Bessel function (complex argument)
     ru = np.zeros(num, dtype=np.complex128)
     aa2(ax, ri, num, ru)
@@ -172,7 +174,7 @@ def shexqnn2(x, ri, nang=1, doSA=False, nterm=2e7, eps=1.0e-20, xmin=1.0e-06):
     # ------------------------------------------------------------------------------------------
 
     # Bessel functions
-    ass = 1.0 / np.sqrt( 0.5 * np.pi * ax )
+    ass = 1.0 / np.sqrt(0.5 * np.pi * ax)
     w1 = 2.0 / np.pi * ax
     Si = np.sin(x) * ax
     Co = np.cos(x) * ax
@@ -183,7 +185,7 @@ def shexqnn2(x, ri, nang=1, doSA=False, nterm=2e7, eps=1.0e-20, xmin=1.0e-06):
     iu0 = 0
 
     # n = 1
-    besJ1 = ( Si * ax - Co) * ass
+    besJ1 = (Si * ax - Co) * ass
     besY1 = (-Co * ax - Si) * ass
     iu1 = 0
     iu2 = 0
@@ -192,12 +194,12 @@ def shexqnn2(x, ri, nang=1, doSA=False, nterm=2e7, eps=1.0e-20, xmin=1.0e-06):
     s = ru[0] / ri + ax
     s1 = s * besJ1 - besJ0
     s2 = s * besY1 - besY0
-    ra0 = s1 / (s1 - s3 * s2) # coefficient a_1
+    ra0 = s1 / (s1 - s3 * s2)  # coefficient a_1
 
     s = ru[0] * ri + ax
     s1 = s * besJ1 - besJ0
     s2 = s * besY1 - besY0
-    rb0 = s1 / (s1 - s3 * s2) # coefficient b_1
+    rb0 = s1 / (s1 - s3 * s2)  # coefficient b_1
 
     # efficiency factors
     r = -1.5 * (ra0 - rb0)
@@ -254,18 +256,21 @@ def shexqnn2(x, ri, nang=1, doSA=False, nterm=2e7, eps=1.0e-20, xmin=1.0e-06):
 
         s1 = s * besJ2 / fact[iu2] - besJ1 / fact[iu1]
         s2 = s * besY2 * fact[iu2] - besY1 * fact[iu1]
-        ra1 = s1 / (s1 - s3 * s2)                        # coefficient a_n, (n=iterm)
+        # coefficient a_n, (n=iterm)
+        ra1 = s1 / (s1 - s3 * s2)
 
         s = ru[iterm-1] * ri + iterm * ax
         s1 = s * besJ2 / fact[iu2] - besJ1 / fact[iu1]
         s2 = s * besY2 * fact[iu2] - besY1 * fact[iu1]
-        rb1 = s1 / (s1 - s3 * s2)                        # coefficient b_n, (n=iterm)
+        # coefficient b_n, (n=iterm)
+        rb1 = s1 / (s1 - s3 * s2)
 
         # efficiency factors
         z = -z
         rr = z * (iterm + 0.5) * (ra1 - rb1)
         r += rr
-        ss += (iterm - 1.0) * (iterm + 1.0) / iterm * (ra0 * np.conj(ra1) + rb0 * np.conj(rb1)) + an2 / iterm / (iterm - 1.0) * (ra0 * np.conj(rb0))
+        ss += (iterm - 1.0) * (iterm + 1.0) / iterm * (ra0 * np.conj(ra1) +
+                                                       rb0 * np.conj(rb1)) + an2 / iterm / (iterm - 1.0) * (ra0 * np.conj(rb0))
         qq = an * np.real(ra1 + rb1)
         Q_ext += qq
         Q_sca += an * (np.abs(ra1)**2 + np.abs(rb1)**2)

@@ -1,0 +1,23 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "miex"
+version = "1.0"
+requires-python = ">=3.6"
+authors = [
+  { name="Sebastian Wolf", email="swolf@astrophysik.uni-kiel.de" },
+]
+description = "MIEX: Mie Scattering code for large grains"
+readme = "README.md"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/miex"]
+
+[project.urls]
+Homepage = "https://cau-git.rz.uni-kiel.de/astrophysik/ag-wolf/miex-py"

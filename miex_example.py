@@ -64,8 +64,8 @@ S_11 = np.zeros(nang2, dtype=float)
 S_12 = np.zeros(nang2, dtype=float)
 weight = np.trapz(nx_arr, x=x_arr)
 for i in range(nang2):
-    S_11[i] = np.trapz(S_11_tmp[:,i] * nx_arr, x=x_arr) / weight
-    S_12[i] = np.trapz(S_12_tmp[:,i] * nx_arr, x=x_arr) / weight
+    S_11[i] = np.trapz(S_11_tmp[:, i] * nx_arr, x=x_arr) / weight
+    S_12[i] = np.trapz(S_12_tmp[:, i] * nx_arr, x=x_arr) / weight
 
 # plot the results
 fig, ax = plt.subplots(2, 1, sharex=True, layout='constrained')
@@ -105,7 +105,7 @@ for i, x in enumerate(x_arr):
     Q_abs[i] = result[1]
     Q_sca[i] = result[2]
 
-#plot the results
+# plot the results
 fig, ax = plt.subplots(1, 1, layout='constrained')
 ax.plot(x_arr, Q_ext, label='ext')
 ax.plot(x_arr, Q_abs, label='abs')

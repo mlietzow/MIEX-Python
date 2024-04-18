@@ -51,17 +51,17 @@ def conv(line):
 
 
 def main(input_filename):
-    #---------------------------------------------------------------------------------------------------
+    # ---------------------------------------------------------------------------------------------------
     # 0. General settings
-    #---------------------------------------------------------------------------------------------------
+    # ---------------------------------------------------------------------------------------------------
     with open(input_filename) as input_file:
         # Real refractive index of the surrouding medium
         refmed = float(input_file.readline())
         print(f'Real refractive index of surrouding medium    : {refmed}')
 
-        #---------------------------------------------------------------------------------------------------
+        # ---------------------------------------------------------------------------------------------------
         # 1. Get main parameters
-        #---------------------------------------------------------------------------------------------------
+        # ---------------------------------------------------------------------------------------------------
         nlam = int(input_file.readline())
         ncomp = int(input_file.readline())
         print(f'Number of wavelengths                         : {nlam}')
@@ -70,7 +70,7 @@ def main(input_filename):
         fnames = []
         abun = np.ones(ncomp) * 100.0
 
-        #---------------------------------------------------------------------------------------------------
+        # ---------------------------------------------------------------------------------------------------
         print('Name of the dust data files (lambda/n/k data)')
         print('    [all data files have to contain the refractive]')
         print('    [index and the same wavelength distribution   ]')
@@ -94,8 +94,8 @@ def main(input_filename):
         if ask1 == 1:
             radmin = float(input_file.readline())
             radmax = radmin
-            nrad   = 1
-            alpha  = 0.0
+            nrad = 1
+            alpha = 0.0
             print(f'    Grain radius [micron]                     : {radmin}')
         else:
             radmin = float(input_file.readline())
@@ -118,9 +118,10 @@ def main(input_filename):
                 nang = int((nang2 - 1) / 2 + 1)
                 doSA = True
             else:
-                raise Exception('Number of scattering angles must be odd! Aborting.')
+                raise Exception(
+                    'Number of scattering angles must be odd! Aborting.')
         else:
-            nang  = 1
+            nang = 1
             nang2 = 1
             doSA = False
 
@@ -134,9 +135,9 @@ def main(input_filename):
         else:
             svsep = True
 
-    #---------------------------------------------------------------------------------------------------
+    # ---------------------------------------------------------------------------------------------------
     # 2. Read data files & Prepare the calculations
-    #---------------------------------------------------------------------------------------------------
+    # ---------------------------------------------------------------------------------------------------
     wavelength = np.zeros(nlam)
     n_real = np.zeros((ncomp, nlam))
     k_imag = np.zeros((ncomp, nlam))
@@ -160,12 +161,13 @@ def main(input_filename):
     S12 = np.zeros((nang2, nlam))
     S33 = np.zeros((nang2, nlam))
     S34 = np.zeros((nang2, nlam))
-    
+
     print(' >> Calculation started ...')
 
     # read lambda/n/k database
     for icomp in range(ncomp):
-        w, n, k = np.loadtxt('ri-data/' + fnames[icomp], comments='#', unpack=True, converters=conv)
+        w, n, k = np.loadtxt(
+            'ri-data/' + fnames[icomp], comments='#', unpack=True, converters=conv)
         wavelength = w[:nlam]
         n_real[icomp] = n[:nlam]
         k_imag[icomp] = k[:nlam]
@@ -179,9 +181,9 @@ def main(input_filename):
     else:
         steplog = 0.0
 
-    #---------------------------------------------------------------------------------------------------
+    # ---------------------------------------------------------------------------------------------------
     # 3. Run the Mie scattering routines
-    #---------------------------------------------------------------------------------------------------
+    # ---------------------------------------------------------------------------------------------------
     counter = 0
     print('0 %', end='\r')
     for ilam in range(nlam):
@@ -208,10 +210,11 @@ def main(input_filename):
                 x = 2.0 * np.pi * rad * refmed / wavelength[ilam]
 
                 # complex refractive index
-                ri = complex(n_real[icomp,ilam], k_imag[icomp,ilam]) / refmed
+                ri = complex(n_real[icomp, ilam], k_imag[icomp, ilam]) / refmed
 
                 # derive the scattering parameters
-                q_extx, q_absx, q_scax, q_bkx, q_prx, albedox, g_scax, S1x, S2x = miex.shexqnn2(x, ri, nang, doSA)
+                q_extx, q_absx, q_scax, q_bkx, q_prx, albedox, g_scax, S1x, S2x = miex.shexqnn2(
+                    x, ri, nang, doSA)
 
                 # update average values
                 weight = abun[icomp] * rad**alpha * delrad
@@ -235,12 +238,13 @@ def main(input_filename):
 
                 g_sca[ilam] += g_scax * wqscx
 
-                S11x, S12x, S33x, S34x = miex.scattering_matrix_elements(S1x, S2x)
+                S11x, S12x, S33x, S34x = miex.scattering_matrix_elements(
+                    S1x, S2x)
 
-                S11[:,ilam] += S11x * weight
-                S12[:,ilam] += S12x * weight
-                S33[:,ilam] += S33x * weight
-                S34[:,ilam] += S34x * weight
+                S11[:, ilam] += S11x * weight
+                S12[:, ilam] += S12x * weight
+                S33[:, ilam] += S33x * weight
+                S34[:, ilam] += S34x * weight
 
         c_ext[ilam] /= weisum
         c_sca[ilam] /= weisum
@@ -252,17 +256,17 @@ def main(input_filename):
         q_bk[ilam] /= wrad
         q_abs[ilam] /= wrad
 
-        S11[:,ilam] /= weisum
-        S12[:,ilam] /= weisum
-        S33[:,ilam] /= weisum
-        S34[:,ilam] /= weisum
+        S11[:, ilam] /= weisum
+        S12[:, ilam] /= weisum
+        S33[:, ilam] /= weisum
+        S34[:, ilam] /= weisum
 
         albedo[ilam] = c_sca[ilam] / c_ext[ilam]
         g_sca[ilam] /= wqsc
 
-    #---------------------------------------------------------------------------------------------------
+    # ---------------------------------------------------------------------------------------------------
     # 4. Save the results
-    #---------------------------------------------------------------------------------------------------
+    # ---------------------------------------------------------------------------------------------------
     os.makedirs(os.path.dirname('results/' + fresult), exist_ok=True)
     with open('results/' + fresult, 'w') as output_file:
         output_file.write('# *** PROJECT PARAMETERS ***\n')
@@ -271,7 +275,7 @@ def main(input_filename):
         output_file.write(f'# Number of chemical components    : {ncomp}\n')
         output_file.write('# Relative abundances [%]          :\n')
         for icomp in range(ncomp):
-             output_file.write(f'# {icomp+1}. component: {abun[icomp]*100}\n')
+            output_file.write(f'# {icomp+1}. component: {abun[icomp]*100}\n')
         output_file.write('# Name(s) of the dust data file(s) :\n')
         for icomp in range(ncomp):
             output_file.write(f'# {icomp+1}. component: {fnames[icomp]}\n')
@@ -280,58 +284,78 @@ def main(input_filename):
         output_file.write(f'# Size distribution exponent       : {alpha}\n')
         output_file.write(f'# Number of size bins              : {nrad}\n')
         if doSA:
-            output_file.write(f'# Number of scattering angles      : {nang2}\n')
+            output_file.write(
+                f'# Number of scattering angles      : {nang2}\n')
         output_file.write('#\n')
         output_file.write('#\n')
-        #-----------------------------------------------------------------------------------------------
+        # -----------------------------------------------------------------------------------------------
         output_file.write('# *** RESULTS ***\n')
         output_file.write('#\n')
-        output_file.write('# 1. Wavelength [micron]         Q_ext                    C_ext [m^2]\n')
+        output_file.write(
+            '# 1. Wavelength [micron]         Q_ext                    C_ext [m^2]\n')
         for ilam in range(nlam):
-                output_file.write(f'{wavelength[ilam]} {q_ext[ilam]} {c_ext[ilam]}\n')
-        output_file.write('# =============================================================== #\n')
+            output_file.write(
+                f'{wavelength[ilam]} {q_ext[ilam]} {c_ext[ilam]}\n')
+        output_file.write(
+            '# =============================================================== #\n')
 
-        output_file.write('# 2. Wavelength [micron]         Q_sca                    C_sca [m^2]\n')
+        output_file.write(
+            '# 2. Wavelength [micron]         Q_sca                    C_sca [m^2]\n')
         for ilam in range(nlam):
-                output_file.write(f'{wavelength[ilam]} {q_sca[ilam]} {c_sca[ilam]}\n')
-        output_file.write('# =============================================================== #\n')
+            output_file.write(
+                f'{wavelength[ilam]} {q_sca[ilam]} {c_sca[ilam]}\n')
+        output_file.write(
+            '# =============================================================== #\n')
 
-        output_file.write('# 3. Wavelength [micron]         Q_bk                      C_bk [m^2]\n')
+        output_file.write(
+            '# 3. Wavelength [micron]         Q_bk                      C_bk [m^2]\n')
         for ilam in range(nlam):
-                output_file.write(f'{wavelength[ilam]} {q_bk[ilam]} {c_bk[ilam]}\n')
-        output_file.write('# =============================================================== #\n')
+            output_file.write(
+                f'{wavelength[ilam]} {q_bk[ilam]} {c_bk[ilam]}\n')
+        output_file.write(
+            '# =============================================================== #\n')
 
-        output_file.write('# 4. Wavelength [micron]         Q_abs                    C_abs [m^2]\n')
+        output_file.write(
+            '# 4. Wavelength [micron]         Q_abs                    C_abs [m^2]\n')
         for ilam in range(nlam):
-                output_file.write(f'{wavelength[ilam]} {q_abs[ilam]} {c_abs[ilam]}\n')
-        output_file.write('# =============================================================== #\n')
+            output_file.write(
+                f'{wavelength[ilam]} {q_abs[ilam]} {c_abs[ilam]}\n')
+        output_file.write(
+            '# =============================================================== #\n')
 
         output_file.write('# 5. Wavelength [micron], Albedo\n')
         for ilam in range(nlam):
-                output_file.write(f'{wavelength[ilam]} {albedo[ilam]}\n')
-        output_file.write('# =============================================================== #\n')
+            output_file.write(f'{wavelength[ilam]} {albedo[ilam]}\n')
+        output_file.write(
+            '# =============================================================== #\n')
 
-        output_file.write('# 6. Wavelength [micron], Scattering asymmetry factor g\n')
+        output_file.write(
+            '# 6. Wavelength [micron], Scattering asymmetry factor g\n')
         for ilam in range(nlam):
-                output_file.write(f'{wavelength[ilam]} {g_sca[ilam]}\n')
-        output_file.write('# =============================================================== #\n')
+            output_file.write(f'{wavelength[ilam]} {g_sca[ilam]}\n')
+        output_file.write(
+            '# =============================================================== #\n')
 
         output_file.write('# 7. Wavelength [micron]         Q_pr\n')
         for ilam in range(nlam):
-            output_file.write(f'{wavelength[ilam]} {q_ext[ilam] - g_sca[ilam] * q_sca[ilam]}\n')
-        output_file.write('# =============================================================== #\n')
+            output_file.write(
+                f'{wavelength[ilam]} {q_ext[ilam] - g_sca[ilam] * q_sca[ilam]}\n')
+        output_file.write(
+            '# =============================================================== #\n')
 
-        output_file.write('# 8. Wavelength [micron]     theta [degree]         S11-S12-S33-S34\n')
+        output_file.write(
+            '# 8. Wavelength [micron]     theta [degree]         S11-S12-S33-S34\n')
         if doSA:
             for ilam in range(nlam):
                 for iang in range(nang2):
                     # angx: scattering angle [degree]
                     angx = iang * 180.0 / (nang2 - 1.0)
-                    output_file.write(f'{wavelength[ilam]} {angx} {S11[iang,ilam]} {S12[iang,ilam]} {S33[iang,ilam]} {S34[iang,ilam]}\n')
+                    output_file.write(
+                        f'{wavelength[ilam]} {angx} {S11[iang,ilam]} {S12[iang,ilam]} {S33[iang,ilam]} {S34[iang,ilam]}\n')
         else:
             output_file.write('# not calculated.\n')
 
-    #---------------------------------------------------------------------------------------------------
+    # ---------------------------------------------------------------------------------------------------
     if svsep:
         # 1. Extinction efficiency factor
         with open('results/' + fresult + '.q_ext', 'w') as output_file:
@@ -386,7 +410,8 @@ def main(input_filename):
         # 11. Q_pr
         with open('results/' + fresult + '.q_pr', 'w') as output_file:
             for ilam in range(nlam):
-                output_file.write(f'{wavelength[ilam]} {q_ext[ilam] - g_sca[ilam] * q_sca[ilam]}\n')
+                output_file.write(
+                    f'{wavelength[ilam]} {q_ext[ilam] - g_sca[ilam] * q_sca[ilam]}\n')
 
         # 12. Scattering Matrix elements S11, S12, S33, and S34
         if doSA:
