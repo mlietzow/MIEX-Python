@@ -45,105 +45,110 @@ from numba import njit
 
 @njit(cache=True)
 def aa2(ax, ri, num, ru):
-    ''' Calculations of the ratio of derivative to the function for Bessel functions of half order with complex argument: J'(n)/J(n).
-        The calculations are given by the recursive expression 'from top to bottom' beginning from n=num.
-        This routine is based on the routine 'aa' published by
-        N.V.Voshchinnikov: 'Optics of Cosmic Dust', Astrophysics and Space Physics Review 12, 1 (2002)
+    """Calculations of the ratio of derivative to the function for Bessel functions of half order with complex argument: J'(n)/J(n).
+    The calculations are given by the recursive expression 'from top to bottom' beginning from n=num.
+    This routine is based on the routine 'aa' published by
+    N.V.Voshchinnikov: 'Optics of Cosmic Dust', Astrophysics and Space Physics Review 12, 1 (2002)
 
-        Parameters
-        ----------
-        ax : float
-            inverse size_parameter
+    Parameters
+    ----------
+    ax : float
+        inverse size_parameter
 
-        ri : complex float
-            complex refractive index
+    ri : complex float
+        complex refractive index
 
-        num : int
-            number for subroutine
+    num : int
+        number for subroutine
 
-        ru : complex array like
-            ru-array of results
-    '''
+    ru : complex array like
+        ru-array of results
+    """
 
     s = ax / ri
-    ru[num-1] = (num + 1.0) * s
+    ru[num - 1] = (num + 1.0) * s
 
     for i in range(num - 1, 0, -1):
-        ru[i-1] = (i + 1.0) * s - 1.0 / (ru[i] + (i + 1.0) * s)
+        ru[i - 1] = (i + 1.0) * s - 1.0 / (ru[i] + (i + 1.0) * s)
 
 
 @njit(cache=True)
 def shexqnn2(x, ri, nang=1, doSA=False, nterm=2e7, eps=1.0e-20, xmin=1.0e-06):
-    ''' Derive quantities for a single size parameter and chemical composition.
-        This routine is based on the routine 'shexqnn' published by
-        N.V.Voshchinnikov: 'Optics of Cosmic Dust', Astrophysics and Space Physics Review 12, 1 (2002)
+    """Derive quantities for a single size parameter and chemical composition.
+    This routine is based on the routine 'shexqnn' published by
+    N.V.Voshchinnikov: 'Optics of Cosmic Dust', Astrophysics and Space Physics Review 12, 1 (2002)
 
-        Parameters
-        ----------
-        x : float
-            size parameter = 2 * pi * radius / wavelength
+    Parameters
+    ----------
+    x : float
+        size parameter = 2 * pi * radius / wavelength
 
-        ri : complex float
-            complex refractive index
+    ri : complex float
+        complex refractive index
 
-        nang : int, optional, default = 1
-            half number of scattering angles theta in the intervall 0...pi/2 (equidistantly distributed)
+    nang : int, optional, default = 1
+        half number of scattering angles theta in the intervall 0...pi/2 (equidistantly distributed)
 
-        doSA : bool, optional, default = False
-            calculation of the scattering amplitudes
+    doSA : bool, optional, default = False
+        calculation of the scattering amplitudes
 
-        nterm : int, optional, default = 2e7
-            Maximum number of terms to be considered
+    nterm : int, optional, default = 2e7
+        Maximum number of terms to be considered
 
-        eps : float, optional, default = 1.0e-20
-            Accuracy to be achieved
+    eps : float, optional, default = 1.0e-20
+        Accuracy to be achieved
 
-        xmin : float, optional, default = 1.0e-06
-            Minimum size parameter
+    xmin : float, optional, default = 1.0e-06
+        Minimum size parameter
 
-        Returns
-        -------
-        0:  Q_ext : float
-            extinction efficiency
+    Returns
+    -------
+    0:  Q_ext : float
+        extinction efficiency
 
-        1:  Q_abs : float
-            absorption efficiency
+    1:  Q_abs : float
+        absorption efficiency
 
-        2:  Q_sca : float
-            scattering efficiency
+    2:  Q_sca : float
+        scattering efficiency
 
-        3:  Q_bk : float
-            backscattering efficiency
+    3:  Q_bk : float
+        backscattering efficiency
 
-        4:  Q_pr : float
-            radiation pressure efficiency
+    4:  Q_pr : float
+        radiation pressure efficiency
 
-        5:  albedo : float
-            single scattering albedo
+    5:  albedo : float
+        single scattering albedo
 
-        6:  g_sca : float
-            scattering asymmetry factor
+    6:  g_sca : float
+        scattering asymmetry factor
 
-        7:  SA_1 : ndarray
-            scattering amplitude function. The length of the array is 2*nang-1
+    7:  SA_1 : ndarray
+        scattering amplitude function. The length of the array is 2*nang-1
 
-        8:  SA_2 : ndarray
-            scattering amplitude function. The length of the array is 2*nang-1
+    8:  SA_2 : ndarray
+        scattering amplitude function. The length of the array is 2*nang-1
 
-        Raises
-        ------
-        ValueError
-            if Mie scattering limit is exceeded or if required terms exceed maximum number of terms
-        ValueError
-            if somehow calculations result in NaN
-    '''
+    Raises
+    ------
+    ValueError
+        if Mie scattering limit is exceeded or if required terms exceed maximum number of terms
+    ValueError
+        if somehow calculations result in NaN
+    """
 
-    fact = np.array([1.0, 1.0e+250])
-    factor = 1.0e+250
+    fact = np.array([1.0, 1.0e250])
+    factor = 1.0e250
 
     if x <= xmin:
-        raise ValueError('Mie scattering limit', xmin, 'exceeded, current size parameter:',
-                         x, 'decrease default value of the argument \'xmin\'')
+        raise ValueError(
+            "Mie scattering limit",
+            xmin,
+            "exceeded, current size parameter:",
+            x,
+            "decrease default value of the argument 'xmin'",
+        )
 
     ax = 1.0 / x
     b = 2.0 * ax**2
@@ -162,8 +167,13 @@ def shexqnn2(x, ri, nang=1, doSA=False, nterm=2e7, eps=1.0e-20, xmin=1.0e-06):
         num = int(1.005 * y + 50.5)
 
     if num > nterm:
-        raise ValueError('Maximum number of terms:', nterm, 'number of terms required: ',
-                         num, 'increase default value of the argument \'nterm\'')
+        raise ValueError(
+            "Maximum number of terms:",
+            nterm,
+            "number of terms required: ",
+            num,
+            "increase default value of the argument 'nterm'",
+        )
 
     # Logarithmic derivative to Bessel function (complex argument)
     ru = np.zeros(num, dtype=np.complex128)
@@ -204,7 +214,7 @@ def shexqnn2(x, ri, nang=1, doSA=False, nterm=2e7, eps=1.0e-20, xmin=1.0e-06):
     # efficiency factors
     r = -1.5 * (ra0 - rb0)
     Q_ext = an * np.real(ra0 + rb0)
-    Q_sca = an * (np.abs(ra0)**2 + np.abs(rb0)**2)
+    Q_sca = an * (np.abs(ra0) ** 2 + np.abs(rb0) ** 2)
 
     # scattering amplitude functions
     nang2 = 2 * nang - 1
@@ -241,7 +251,7 @@ def shexqnn2(x, ri, nang=1, doSA=False, nterm=2e7, eps=1.0e-20, xmin=1.0e-06):
         else:
             besY2 = an2 * ax * besY1 - besY0 / factor
 
-        if np.abs(besY2) > 1.0e+300:
+        if np.abs(besY2) > 1.0e300:
             besY2 = besY2 / factor
             iu2 = iu1 + 1
 
@@ -252,14 +262,14 @@ def shexqnn2(x, ri, nang=1, doSA=False, nterm=2e7, eps=1.0e-20, xmin=1.0e-06):
         besJ2 = w1 / besY1 + besJ2 * besJ1
 
         # Mie coefficients
-        s = ru[iterm-1] / ri + iterm * ax
+        s = ru[iterm - 1] / ri + iterm * ax
 
         s1 = s * besJ2 / fact[iu2] - besJ1 / fact[iu1]
         s2 = s * besY2 * fact[iu2] - besY1 * fact[iu1]
         # coefficient a_n, (n=iterm)
         ra1 = s1 / (s1 - s3 * s2)
 
-        s = ru[iterm-1] * ri + iterm * ax
+        s = ru[iterm - 1] * ri + iterm * ax
         s1 = s * besJ2 / fact[iu2] - besJ1 / fact[iu1]
         s2 = s * besY2 * fact[iu2] - besY1 * fact[iu1]
         # coefficient b_n, (n=iterm)
@@ -269,15 +279,16 @@ def shexqnn2(x, ri, nang=1, doSA=False, nterm=2e7, eps=1.0e-20, xmin=1.0e-06):
         z = -z
         rr = z * (iterm + 0.5) * (ra1 - rb1)
         r += rr
-        ss += (iterm - 1.0) * (iterm + 1.0) / iterm * (ra0 * np.conj(ra1) +
-                                                       rb0 * np.conj(rb1)) + an2 / iterm / (iterm - 1.0) * (ra0 * np.conj(rb0))
+        ss += (iterm - 1.0) * (iterm + 1.0) / iterm * (
+            ra0 * np.conj(ra1) + rb0 * np.conj(rb1)
+        ) + an2 / iterm / (iterm - 1.0) * (ra0 * np.conj(rb0))
         qq = an * np.real(ra1 + rb1)
         Q_ext += qq
-        Q_sca += an * (np.abs(ra1)**2 + np.abs(rb1)**2)
+        Q_sca += an * (np.abs(ra1) ** 2 + np.abs(rb1) ** 2)
 
         # leaving-the-loop with error criterion
         if np.isnan(Q_ext):
-            raise ValueError('Q_ext is not a number')
+            raise ValueError("Q_ext is not a number")
 
         # leaving-the-loop criterion
         if np.abs(qq / Q_ext) < eps:
@@ -309,7 +320,7 @@ def shexqnn2(x, ri, nang=1, doSA=False, nterm=2e7, eps=1.0e-20, xmin=1.0e-06):
     # efficiency factors (final calculations)
     Q_ext *= b
     Q_sca *= b
-    Q_bk = 2.0 * b * np.abs(r)**2
+    Q_bk = 2.0 * b * np.abs(r) ** 2
     Q_pr = Q_ext - 2.0 * b * np.real(ss)
     Q_abs = Q_ext - Q_sca
     albedo = Q_sca / Q_ext
@@ -319,24 +330,24 @@ def shexqnn2(x, ri, nang=1, doSA=False, nterm=2e7, eps=1.0e-20, xmin=1.0e-06):
 
 
 def scattering_matrix_elements(SA_1, SA_2):
-    ''' Calculations of the scattering matrix elements
+    """Calculations of the scattering matrix elements
 
-        Parameters
-        ----------
-        SA_1 : array_like
-            scattering amplitude function
+    Parameters
+    ----------
+    SA_1 : array_like
+        scattering amplitude function
 
-        SA_2 : array_like
-            scattering amplitude function
+    SA_2 : array_like
+        scattering amplitude function
 
-        Returns
-        -------
-        S_11, S_12, S_33, S_34 : array_like
-            scattering matrix elements
-    '''
+    Returns
+    -------
+    S_11, S_12, S_33, S_34 : array_like
+        scattering matrix elements
+    """
 
-    S_11 = 0.5 * (np.abs(SA_2)**2 + np.abs(SA_1)**2)
-    S_12 = 0.5 * (np.abs(SA_2)**2 - np.abs(SA_1)**2)
+    S_11 = 0.5 * (np.abs(SA_2) ** 2 + np.abs(SA_1) ** 2)
+    S_12 = 0.5 * (np.abs(SA_2) ** 2 - np.abs(SA_1) ** 2)
     S_33 = np.real(SA_2 * np.conj(SA_1))
     S_34 = np.imag(SA_2 * np.conj(SA_1))
 

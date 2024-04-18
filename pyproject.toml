@@ -16,8 +16,5 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 
-[tool.hatch.build.targets.wheel]
-packages = ["src/miex"]
-
 [project.urls]
 Homepage = "https://cau-git.rz.uni-kiel.de/astrophysik/ag-wolf/miex-py"

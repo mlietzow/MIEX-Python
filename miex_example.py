@@ -20,18 +20,18 @@ result = miex.shexqnn2(x, m, nang, doSA=True)
 matrix = miex.scattering_matrix_elements(result[7], result[8])
 
 # plot the results
-fig, ax = plt.subplots(2, 1, sharex=True, layout='constrained')
+fig, ax = plt.subplots(2, 1, sharex=True, layout="constrained")
 theta = np.linspace(0, 180, nang2)
 
-ax[0].plot(theta, matrix[0]/matrix[0][0])
-ax[0].set_ylabel('S11')
-ax[0].set_yscale('log')
+ax[0].plot(theta, matrix[0] / matrix[0][0])
+ax[0].set_ylabel("S11")
+ax[0].set_yscale("log")
 
-ax[1].plot(theta, -matrix[1]/matrix[0])
-ax[1].set_xlabel('Scattering angle')
-ax[1].set_ylabel('-S12 / S11')
+ax[1].plot(theta, -matrix[1] / matrix[0])
+ax[1].set_xlabel("Scattering angle")
+ax[1].set_ylabel("-S12 / S11")
 
-ax[0].set_title(f'Scattering matrix elements for x = {x} and m = {m}')
+ax[0].set_title(f"Scattering matrix elements for x = {x} and m = {m}")
 plt.show()
 
 # ====================================================================================================
@@ -49,7 +49,7 @@ m = complex(1.5, 0.0)
 
 # array of size parameter and size distribution
 x_arr = np.geomspace(1e-1, 1e1, nsize)
-nx_arr = x_arr**(-3.5)
+nx_arr = x_arr ** (-3.5)
 
 # run miex and calculate scattering matrix elements
 S_11_tmp = np.zeros((nsize, nang2), dtype=float)
@@ -68,18 +68,18 @@ for i in range(nang2):
     S_12[i] = np.trapz(S_12_tmp[:, i] * nx_arr, x=x_arr) / weight
 
 # plot the results
-fig, ax = plt.subplots(2, 1, sharex=True, layout='constrained')
+fig, ax = plt.subplots(2, 1, sharex=True, layout="constrained")
 theta = np.linspace(0, 180, nang2)
 
-ax[0].plot(theta, S_11/S_11[0])
-ax[0].set_ylabel('S11')
-ax[0].set_yscale('log')
+ax[0].plot(theta, S_11 / S_11[0])
+ax[0].set_ylabel("S11")
+ax[0].set_yscale("log")
 
-ax[1].plot(theta, -S_12/S_11)
-ax[1].set_xlabel('Scattering angle')
-ax[1].set_ylabel('-S12 / S11')
+ax[1].plot(theta, -S_12 / S_11)
+ax[1].set_xlabel("Scattering angle")
+ax[1].set_ylabel("-S12 / S11")
 
-ax[0].set_title(f'Averaged scattering matrix elements for m = {m}')
+ax[0].set_title(f"Averaged scattering matrix elements for m = {m}")
 plt.show()
 
 # ====================================================================================================
@@ -106,19 +106,19 @@ for i, x in enumerate(x_arr):
     Q_sca[i] = result[2]
 
 # plot the results
-fig, ax = plt.subplots(1, 1, layout='constrained')
-ax.plot(x_arr, Q_ext, label='ext')
-ax.plot(x_arr, Q_abs, label='abs')
-ax.plot(x_arr, Q_sca, label='sca')
+fig, ax = plt.subplots(1, 1, layout="constrained")
+ax.plot(x_arr, Q_ext, label="ext")
+ax.plot(x_arr, Q_abs, label="abs")
+ax.plot(x_arr, Q_sca, label="sca")
 
-ax.set_xlabel('Size parameter')
-ax.set_xscale('log')
+ax.set_xlabel("Size parameter")
+ax.set_xscale("log")
 
-ax.set_ylabel('Efficiency factor')
-ax.set_yscale('log')
+ax.set_ylabel("Efficiency factor")
+ax.set_yscale("log")
 
 ax.legend()
-ax.set_title(f'Averaged efficiency factors for m = {m}')
+ax.set_title(f"Averaged efficiency factors for m = {m}")
 plt.show()
 
 # ====================================================================================================
