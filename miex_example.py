@@ -1,4 +1,4 @@
-import miex
+import miex.miex as miex
 import numpy as np
 import matplotlib.pyplot as plt
 

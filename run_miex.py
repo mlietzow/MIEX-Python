@@ -1,4 +1,4 @@
-import miex
+from src.miex import miex
 import numpy as np
 import sys
 import os
