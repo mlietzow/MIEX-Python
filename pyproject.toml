@@ -17,4 +17,4 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "https://cau-git.rz.uni-kiel.de/astrophysik/ag-wolf/miex-py"
+Homepage = "https://github.com/mlietzow/MIEX-Python"
