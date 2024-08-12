@@ -89,13 +89,15 @@ The input file is organized as follows:
 
 ### Run MIEX via streamlit
 
-[miex_app.py](miex_app.py) can be used as a simple Streamlit web app. Install Streamlit
+[miex_app.py](miex_app.py) can be used as a simple Streamlit web app: https://miex-python.streamlit.app/.
+
+Alternatively, install Streamlit
 
 ```bash
 pip3 install streamlit
 ```
 
-and start the web app:
+and start the web app locally:
 
 ```bash
 streamlit run miex_app.py
