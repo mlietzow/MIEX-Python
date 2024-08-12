@@ -41,7 +41,7 @@ pip3 install -r requirements.txt
 
 The package can be installed via `pip`:
 ```
-pip install miex-py/
+pip install MIEX-Python/
 ```
 
 ## Run MIEX
