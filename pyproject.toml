@@ -7,7 +7,7 @@ name = "miex"
 version = "1.0"
 requires-python = ">=3.6"
 authors = [
-  { name="Sebastian Wolf", email="swolf@astrophysik.uni-kiel.de" },
+  { name="Moritz Lietzow-Sinjen", email="mlietzow@astrophysik.uni-kiel.de" },
 ]
 description = "MIEX: Mie Scattering code for large grains"
 readme = "README.md"

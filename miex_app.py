@@ -7,12 +7,29 @@ import streamlit as st
 
 # Converter for lambda/n/k database files
 def conv(line):
-    return line.replace(b"D", b"e")
+    return line.replace("D", "e")
 
 
 st.set_page_config(page_title="MIEX", page_icon=None)
-st.title("MIEX")
-st.text("MIEX is a Mie scattering code for large grains")
+st.title("MIEX App")
+st.write("This app is a Mie scattering code for large grains written in Python and based on [MIEX](https://ui.adsabs.harvard.edu/abs/2018ascl.soft10019W) by [Wolf & Voshchinnikov (2004)](https://ui.adsabs.harvard.edu/abs/2004CoPhC.162..113W).")
+st.write("""
+    The following quantities for
+
+    1. single grain sizes / chemical components and
+    2. mixtures of chemically different grains with a size distribution
+
+    can be calculated:
+
+    - Scattering matrix elements $S_{11}$, $S_{12}$, $S_{33}$, and $S_{34}$,
+    - Extinction efficiency factor ($Q_\\mathrm{ext}$) and Extinction cross-section ($C_\\mathrm{ext}$),
+    - Scattering efficiency factor ($Q_\\mathrm{sca}$) and Scattering cross-section ($C_\\mathrm{sca}$),
+    - Absorption efficiency factor ($Q_\\mathrm{abs}$) and Absorption cross-section ($C_\\mathrm{abs}$),
+    - Backscattering efficiency factor ($Q_\\mathrm{bk}$) and Backscattering cross-section ($C_\\mathrm{bk}$),
+    - Radiation pressure efficiency factor ($Q_\\mathrm{pr}$),
+    - Albedo,
+    - Scattering asymmetry factor ($g$).
+""")
 
 st.divider()
 
@@ -31,16 +48,16 @@ if radio_wavelength == "single":
                 st.number_input(
                     "Real part of refractive index:",
                     value=1.50,
-                    format="%f",
+                    format="%e",
                     step=0.01,
-                    min_value=1.0,
+                    min_value=0.0,
                 )
             ]
         )
         input_wavelength = np.array(
             [
                 st.number_input(
-                    r"Wavelength $\lambda$ [micron]:", value=1.0, format="%f", step=0.1
+                    "Wavelength $\\lambda$ [micron]:", value=1.0, format="%e", step=0.1, min_value=0.0
                 )
             ]
         )
@@ -50,7 +67,7 @@ if radio_wavelength == "single":
                 st.number_input(
                     "Imaginary part of refractive index:",
                     value=0.0,
-                    format="%f",
+                    format="%e",
                     step=0.01,
                     min_value=0.0,
                 )
@@ -86,6 +103,8 @@ else:
                 format="%f",
                 step=1.0,
                 key=f"abun{icomp}",
+                min_value=0.0,
+                max_value=100.0,
             )
 
     abun /= 100.0
@@ -102,7 +121,7 @@ col1, col2 = st.columns(2)
 if radio_grain == "single":
     with col1:
         radmin = st.number_input(
-            r"Grain radius $r$ [micron]:", value=1.0, format="%f", step=0.1
+            "Grain radius $r$ [micron]:", value=1.0, format="%e", step=0.1, min_value=0.0
         )
 
     radmax = radmin
@@ -112,36 +131,36 @@ if radio_grain == "single":
 else:
     dist_type = st.radio(
         "Distribution type",
-        options=[r"Power law", r"Power law with exponential decay"],
+        options=["Power law", "Power law with exponential decay"],
         horizontal=True,
     )
-    st.caption(r"Power law: $n(r) \propto r^q$")
+    st.caption("Power law: $n(r) \\propto r^q$")
     st.caption(
-        r"Power law with exponential decay: $n(r) \propto r^q \times \exp(-r / p)$"
+        "Power law with exponential decay: $n(r) \\propto r^q \\times \\exp(-r / p)$"
     )
     with col1:
         radmin = st.number_input(
-            r"Minimum grain size $r_{\rm min}$ [micron]:",
+            "Minimum grain size $r_{\\rm min}$ [micron]:",
             value=0.01,
-            format="%f",
+            format="%e",
             step=0.1,
         )
         exponent = st.number_input(
-            r"Size distribtion exponent $q$", value=-3.5, format="%f", step=0.1
+            "Size distribtion exponent $q$", value=-3.5, format="%f", step=0.1, max_value=0.0
         )
-        if "exponent" in dist_type:
+        if "exponential" in dist_type:
             parameter2 = st.number_input(
-                r"Exponential decay parameter $p$", value=1.0, format="%f", step=0.1
+                "Exponential decay parameter $p$", value=1.0, format="%e", step=0.1, min_value=0.0
             )
     with col2:
         radmax = st.number_input(
-            r"Maximum grain size $r_{\rm max}$ [micron]:",
+            "Maximum grain size $r_{\\rm max}$ [micron]:",
             value=1.0,
-            format="%f",
+            format="%e",
             step=0.1,
         )
         nrad = st.number_input(
-            r"Number of size bins:", value=100, format="%d", step=1, min_value=1
+            "Number of size bins:", value=100, format="%d", step=1, min_value=1
         )
 
 st.divider()
@@ -151,7 +170,7 @@ with col1:
     doSA = st.checkbox("Calculate scattering matrix elements", value=False)
 with col2:
     nang2 = st.number_input(
-        r"Number of scattering angles in the intervall $0$ to $\pi$ (equidistantly distributed, must be odd):",
+        "Number of scattering angles in the intervall $0$ to $\\pi$ (equidistantly distributed, must be odd):",
         value=91,
         format="%d",
         step=2,
@@ -166,6 +185,9 @@ with col1:
     run_miex = st.button("Run")
 with col2:
     plot_res = st.checkbox("Plot results", value=False)
+
+st.divider()
+st.write("The original source code written in FORTRAN90 is distributed under the [CPC license](https://www.elsevier.com/about/policies/open-access-licenses/elsevier-user-license/cpc-license). Modified and ported to Python with permission of S. Wolf.")
 
 if run_miex:
     # ---------------------------------------------------------------------------------------------------
@@ -505,7 +527,7 @@ if run_miex:
             ax[2].plot(wavelength, albedo, label="single scattering albedo")
             ax[2].plot(wavelength, g_sca, label="scattering assymetry factor")
 
-            # ax[2].set_yscale('log')
+            # ax[2].set_yscale("log")
             ax[2].set_xlabel("wavelength [micron]")
             ax[2].set_xscale("log")
             ax[2].legend()

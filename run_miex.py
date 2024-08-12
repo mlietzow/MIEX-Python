@@ -47,7 +47,7 @@ import time
 
 def conv(line):
     # Converter for lambda/n/k database files
-    return line.replace(b"D", b"e")
+    return line.replace("D", "e")
 
 
 def main(input_filename):
