@@ -104,11 +104,7 @@ streamlit run miex_app.py
 
 ## Import MIEX
 
-[miex.py](miex.py) can be imported and used in any python script (see [example script](miex_example.py) or [jupyter notebook](miex_notebook.ipynb)):
-
-```bash
-python3 miex_example.py
-```
+[miex.py](miex.py) can be imported and used in any python script (see [jupyter notebook 1](miex_notebook_1.ipynb) or [jupyter notebook 2](miex_notebook_2.ipynb)):
 
 To calculate the efficiency factors and scattering amplitude functions (optionally), use e.g.,
 
@@ -165,8 +161,8 @@ python3 test_miex.py
     ├── example2.input                           # Exemplary input file
     ├── miex.py                                  # Source code of MIEX
     ├── miex_app.py                              # Python script to run MIEX via Streamlit
-    ├── miex_example.py                          # Exemplary Python script on how to use MIEX in a user build Python code
-    ├── miex_notebook.ipynb                      # Jupyter notebook on how to use MIEX
+    ├── miex_notebook_1.ipynb                    # Jupyter notebook on how to use MIEX (basic)
+    ├── miex_notebook_2.ipynb                    # Jupyter notebook on how to use MIEX (advanced)
     ├── requirements.txt                         # Required python packages for MIEX
     ├── run_miex.py                              # Python script to run MIEX with input files
     └── test_miex.py                             # Python script for test purposes
