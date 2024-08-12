@@ -5,7 +5,7 @@
 [![bibcode](https://img.shields.io/badge/bibcode-2004CoPhC.162..113W-1c459b)](https://ui.adsabs.harvard.edu/abs/2004CoPhC.162..113W)
 [![doi](https://img.shields.io/badge/doi-10.1016%2Fj.cpc.2004.06.070-fab70c)](https://doi.org/10.1016/j.cpc.2004.06.070)
 
-is a Mie scattering code for large grains written in Python and based on **MIEX** [(Wolf & Voshchinnikov 2004)](https://ui.adsabs.harvard.edu/abs/2004CoPhC.162..113W).
+is a Mie scattering code for large grains written in Python and based on [MIEX](https://ui.adsabs.harvard.edu/abs/2018ascl.soft10019W) by [Wolf & Voshchinnikov (2004)](https://ui.adsabs.harvard.edu/abs/2004CoPhC.162..113W).
 
 The following quantities for
 
