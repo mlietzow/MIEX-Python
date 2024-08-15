@@ -5,9 +5,9 @@ import pandas as pd
 import streamlit as st
 
 
-# Converter for lambda/n/k database files
 def conv(line):
-    return line.replace("D", "e")
+    # Converter for lambda/n/k database files
+    return line.replace(b"D", b"e")
 
 
 st.set_page_config(page_title="MIEX", page_icon=None)
@@ -79,7 +79,7 @@ if radio_wavelength == "single":
     abun = np.array([1.0])
 else:
     st.info(
-        "all data files have to contain the refractive index and the same wavelength distribution"
+        "All data files have to contain the refractive index and the same wavelength distribution. See https://github.com/mlietzow/MIEX-Python/tree/main/ri-data for exemplary files."
     )
     with col1:
         ncomp = st.number_input(
@@ -252,6 +252,10 @@ if run_miex:
                     st.stop()
             else:
                 if nlam <= len(w):
+                    if icomp > 0 and not np.array_equal(wavelength, w[:nlam]):
+                        st.error("Wavelength distribution in dust data files do not match.")
+                        st.stop()
+
                     wavelength = w[:nlam]
                     ri_real[icomp] = n[:nlam]
                     ri_imag[icomp] = k[:nlam]
