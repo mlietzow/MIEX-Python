@@ -1,10 +1,5 @@
 # MIEX for Python
 
-[![arXiv](https://img.shields.io/badge/arXiv-astro--ph%2F0406118-b31b1b)](https://arxiv.org/abs/astro-ph/0406118)
-[![ascl](https://img.shields.io/badge/ascl-1810.019-262255)](https://ascl.net/1810.019)
-[![bibcode](https://img.shields.io/badge/bibcode-2004CoPhC.162..113W-1c459b)](https://ui.adsabs.harvard.edu/abs/2004CoPhC.162..113W)
-[![doi](https://img.shields.io/badge/doi-10.1016%2Fj.cpc.2004.06.070-fab70c)](https://doi.org/10.1016/j.cpc.2004.06.070)
-
 is a Mie scattering code for large grains written in Python and based on [MIEX](https://ui.adsabs.harvard.edu/abs/2018ascl.soft10019W) by [Wolf & Voshchinnikov (2004)](https://ui.adsabs.harvard.edu/abs/2004CoPhC.162..113W).
 
 The following quantities for
@@ -22,6 +17,14 @@ can be calculated:
 - Radiation pressure efficiency factor ($Q_\mathrm{pr}$),
 - Albedo,
 - Scattering asymmetry factor ($g$).
+
+Modified and ported to Python with permission of S. Wolf.
+For the original source code of MIEX written in `FORTRAN90`, we refer to
+
+[![arXiv](https://img.shields.io/badge/arXiv-astro--ph%2F0406118-b31b1b)](https://arxiv.org/abs/astro-ph/0406118)
+[![ascl](https://img.shields.io/badge/ascl-1810.019-262255)](https://ascl.net/1810.019)
+[![bibcode](https://img.shields.io/badge/bibcode-2004CoPhC.162..113W-1c459b)](https://ui.adsabs.harvard.edu/abs/2004CoPhC.162..113W)
+[![doi](https://img.shields.io/badge/doi-10.1016%2Fj.cpc.2004.06.070-fab70c)](https://doi.org/10.1016/j.cpc.2004.06.070)
 
 
 ## Requirements
@@ -172,5 +175,5 @@ python3 test_miex.py
 
 ## Copyright
 
-The original source code written in `FORTRAN90` is distributed under the [CPC license](https://www.elsevier.com/about/policies/open-access-licenses/elsevier-user-license/cpc-license).
+The original source code of MIEX written in `FORTRAN90` is distributed under the [CPC license](https://www.elsevier.com/about/policies/open-access-licenses/elsevier-user-license/cpc-license).
 Modified and ported to Python with permission of S. Wolf.
