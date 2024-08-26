@@ -312,11 +312,6 @@ if run_miex:
             log_interp = lambda zz: np.power(10.0, lin_interp(np.log10(zz)))
             return log_interp
 
-        
-        with placeholder.container():
-            progress_text = "Mixing materials ..."
-            progress_bar = st.progress(0, text=progress_text)
-
         eps_comp = np.zeros((ncomp, nlam), dtype=complex)
         # read lambda/n/k database
         for icomp in range(ncomp):
@@ -344,18 +339,25 @@ if run_miex:
             )
             eps_comp[icomp] = (real_interp(wavelength) + 1j * imag_interp(wavelength))**2
 
-        from mpmath import findroot
-        eps_mean = np.zeros(nlam, dtype=complex)
-        counter = 0
-        for ilam in range(nlam):
-            def bruggeman_mix(x):
-                return np.sum(abun * ((eps_comp[:,ilam] - x) / (eps_comp[:,ilam] + 2 * x)))
+        if ncomp > 1:
+            with placeholder.container():
+                progress_text = "Mixing materials ..."
+                progress_bar = st.progress(0, text=progress_text)
 
-            counter += 1
-            if int(counter % (nlam / 10)) == 0:
-                progress_bar.progress(int(counter / nlam * 100), text=progress_text)
+            from mpmath import findroot
+            eps_mean = np.zeros(nlam, dtype=complex)
+            counter = 0
+            for ilam in range(nlam):
+                def bruggeman_mix(x):
+                    return np.sum(abun * ((eps_comp[:,ilam] - x) / (eps_comp[:,ilam] + 2 * x)))
 
-            eps_mean[ilam] = complex(findroot(bruggeman_mix, complex(1.0, 0.1)))
+                counter += 1
+                if int(counter % (nlam / 10)) == 0:
+                    progress_bar.progress(int(counter / nlam * 100), text=progress_text)
+
+                eps_mean[ilam] = complex(findroot(bruggeman_mix, complex(1.0, 0.1)))
+        else:
+            eps_mean = eps_comp[0]
 
         ri_real = np.real(np.sqrt(eps_mean))
         ri_imag = np.imag(np.sqrt(eps_mean))
