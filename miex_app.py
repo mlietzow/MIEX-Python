@@ -5,11 +5,6 @@ import pandas as pd
 import streamlit as st
 
 
-def conv(line):
-    # Converter for lambda/n/k database files
-    return line.replace(b"D", b"e")
-
-
 st.set_page_config(page_title="MIEX", page_icon=None)
 st.title("MIEX App")
 st.write("This app is a Mie scattering code for large grains written in Python and based on [MIEX](https://ui.adsabs.harvard.edu/abs/2018ascl.soft10019W) by [Wolf & Voshchinnikov (2004)](https://ui.adsabs.harvard.edu/abs/2004CoPhC.162..113W).")
@@ -175,7 +170,7 @@ with col2:
         format="%d",
         step=2,
         min_value=1,
-        disabled=not doSA,
+        disabled=(not doSA),
     )
 
 st.divider()
@@ -236,9 +231,8 @@ if run_miex:
             if fnames[icomp] is None:
                 st.error("Error: Dust data file missing!")
                 st.stop()
-            w, n, k = np.loadtxt(
-                fnames[icomp], unpack=True, comments="#", converters=conv
-            )
+
+            w, n, k = np.loadtxt(fnames[icomp], comments="#", unpack=True)
 
             if isinstance(w, float):
                 if nlam == 1:

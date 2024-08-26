@@ -45,11 +45,6 @@ import time
 # ====================================================================================================
 
 
-def conv(line):
-    # Converter for lambda/n/k database files
-    return line.replace(b"D", b"e")
-
-
 def main(input_filename):
     # ---------------------------------------------------------------------------------------------------
     # 0. General settings
@@ -169,7 +164,6 @@ def main(input_filename):
             "ri-data/" + fnames[icomp],
             comments="#",
             unpack=True,
-            converters=conv,
         )
         if icomp > 0 and not np.array_equal(wavelength, w[:nlam]):
             raise Exception("Wavelength distribution in dust data files do not match.")
