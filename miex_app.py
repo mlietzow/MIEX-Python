@@ -3,6 +3,15 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 import streamlit as st
+from scipy.interpolate import interp1d
+
+
+def interp1d_log(xx, yy, kind="linear", fill_value=np.nan):
+    logx = np.log10(xx)
+    logy = np.log10(yy)
+    lin_interp = interp1d(logx, logy, kind=kind, fill_value=fill_value)
+    log_interp = lambda zz: np.power(10.0, lin_interp(np.log10(zz)))
+    return log_interp
 
 
 st.set_page_config(page_title="MIEX", page_icon=None)
@@ -28,63 +37,94 @@ st.write("""
 
 st.divider()
 
-radio_wavelength = st.radio(
-    "Single wavelength or upload dust data files (three columns: wavelength/micron real imag):",
-    options=["single", "upload"],
-    horizontal=True,
+radio_wavelength = str(
+    st.radio(
+        "Single wavelength or upload dust data files:",
+        options=["single", "upload"],
+        horizontal=True,
+    )
 )
+
+fnames = []
+input_ri_real = 1.0
+input_ri_imag = 0.0
+lammin = 1.0
+lammax = 1.0
+nlam = 1
+ncomp = 1
+abun = np.array([1.0])
 
 col1, col2 = st.columns(2)
 if radio_wavelength == "single":
     col1, col2 = st.columns(2)
     with col1:
-        input_ri_real = np.array(
-            [
-                st.number_input(
-                    "Real part of refractive index:",
-                    value=1.50,
-                    format="%e",
-                    step=0.01,
-                    min_value=0.0,
-                )
-            ]
+        input_ri_real = float(
+            st.number_input(
+                "Real part of refractive index:",
+                value=1.50,
+                format="%.6e",
+                min_value=0.0,
+            )
         )
-        input_wavelength = np.array(
-            [
-                st.number_input(
-                    "Wavelength $\\lambda$ [micron]:", value=1.0, format="%e", step=0.1, min_value=0.0
-                )
-            ]
+        lammin = float(
+            st.number_input(
+                "Wavelength $\\lambda$ [micron]:",
+                value=1.0,
+                format="%.6e",
+                step=0.1,
+                min_value=0.0
+            )
         )
+        lammax = lammin
     with col2:
-        input_ri_imag = np.array(
-            [
-                st.number_input(
-                    "Imaginary part of refractive index:",
-                    value=0.0,
-                    format="%e",
-                    step=0.01,
-                    min_value=0.0,
-                )
-            ]
+        input_ri_imag = float(
+            st.number_input(
+                "Imaginary part of refractive index:",
+                value=0.0,
+                format="%.6e",
+                min_value=0.0,
+            )
         )
-
-    nlam = 1
-    ncomp = 1
-    abun = np.array([1.0])
 else:
     st.info(
-        "All data files have to contain the refractive index and the same wavelength distribution. See https://github.com/mlietzow/MIEX-Python/tree/main/ri-data for exemplary files."
+        "All data files have to contain three columns (wavelength/micron real imag). Values are log-linearly interpolated. See https://github.com/mlietzow/MIEX-Python/tree/main/ri-data for exemplary files."
     )
     with col1:
-        ncomp = st.number_input(
-            "Number of chemical components:", value=1, format="%d", step=1, min_value=1
+        lammin = float(
+            st.number_input(
+                "Minimum wavelength $\\lambda_{\\rm min}$ [micron]:",
+                value=0.1,
+                format="%.6e",
+            )
+        )
+        ncomp = int(
+            st.number_input(
+                "Number of chemical components:",
+                value=1,
+                format="%d",
+                step=1,
+                min_value=1
+            )
         )
     with col2:
-        nlam = st.number_input(
-            "Number of wavelengths:", value=100, format="%d", step=1, min_value=1
+        lammax = float(
+            st.number_input(
+                "Maximum wavelength $\\lambda_{\\rm max}$ [micron]:",
+                value=10.0,
+                format="%.6e",
+            )
         )
-    fnames = []
+        nlam = int(
+            st.number_input(
+                "Number of wavelength bins:",
+                value=100,
+                format="%d",
+                step=1,
+                min_value=1
+            )
+        )
+        st.write("")
+
     abun = np.ones(ncomp) * 100.0
     for icomp in range(ncomp):
         with col1:
@@ -92,70 +132,105 @@ else:
                 st.file_uploader(f"Choose {icomp+1}. component:", key=f"file{icomp}")
             )
         with col2:
-            abun[icomp] = st.number_input(
-                f"Relative abundance of the {icomp+1}. component [%]:",
-                value=100.0,
-                format="%f",
-                step=1.0,
-                key=f"abun{icomp}",
-                min_value=0.0,
-                max_value=100.0,
+            abun[icomp] = float(
+                st.number_input(
+                    f"Relative abundance of the {icomp+1}. component [%]:",
+                    value=100.0,
+                    format="%.2f",
+                    key=f"abun{icomp}",
+                    min_value=0.0,
+                    max_value=100.0,
+                )
             )
 
-    abun /= 100.0
+        if fnames[icomp] is None:
+            st.warning("Dust data file missing")
+
+    if np.sum(abun) != 100:
+        st.warning("The sum of the relative abundances is not 100 %")
+
+    abun /= np.sum(abun)
 
 st.divider()
 
-radio_grain = st.radio(
-    "Single grain size or grain size distribution:",
-    options=["single", "distribution"],
-    horizontal=True,
+radio_grain = str(
+    st.radio(
+        "Single grain size or grain size distribution:",
+        options=["single", "distribution"],
+        horizontal=True,
+    )
 )
+
+radmin = 1.0
+radmax = 1.0
+exponent = 0.0
+parameter2 = 1.0
+nrad = 1
+dist_type = ""
 
 col1, col2 = st.columns(2)
 if radio_grain == "single":
     with col1:
-        radmin = st.number_input(
-            "Grain radius $r$ [micron]:", value=1.0, format="%e", step=0.1, min_value=0.0
+        radmin = float(
+            st.number_input(
+                "Grain radius $r$ [micron]:",
+                value=1.0,
+                format="%.6e",
+                min_value=0.0
+            )
         )
-
     radmax = radmin
-    exponent = 0.0
-    nrad = 1
-    dist_type = ""
 else:
-    dist_type = st.radio(
-        "Distribution type",
-        options=["Power law", "Power law with exponential decay"],
-        horizontal=True,
+    dist_type = str(
+        st.radio(
+            "Distribution type",
+            options=["Power law", "Power law with exponential decay"],
+            horizontal=True,
+        )
     )
     st.caption("Power law: $n(r) \\propto r^q$")
-    st.caption(
-        "Power law with exponential decay: $n(r) \\propto r^q \\times \\exp(-r / p)$"
-    )
+    st.caption("Power law with exponential decay: $n(r) \\propto r^q \\times \\exp(-r / p)$")
     with col1:
-        radmin = st.number_input(
-            "Minimum grain size $r_{\\rm min}$ [micron]:",
-            value=0.01,
-            format="%e",
-            step=0.1,
+        radmin = float(
+            st.number_input(
+                "Minimum grain size $r_{\\rm min}$ [micron]:",
+                value=0.01,
+                format="%.6e",
+            )
         )
-        exponent = st.number_input(
-            "Size distribtion exponent $q$", value=-3.5, format="%f", step=0.1, max_value=0.0
+        exponent = float(
+            st.number_input(
+                "Size distribtion exponent $q$",
+                value=-3.5,
+                format="%.2f",
+                max_value=0.0,
+            )
         )
         if "exponential" in dist_type:
-            parameter2 = st.number_input(
-                "Exponential decay parameter $p$", value=1.0, format="%e", step=0.1, min_value=0.0
+            parameter2 = float(
+                st.number_input(
+                    "Exponential decay parameter $p$",
+                    value=1.0,
+                    format="%.6e",
+                    min_value=0.0,
+                )
             )
     with col2:
-        radmax = st.number_input(
-            "Maximum grain size $r_{\\rm max}$ [micron]:",
-            value=1.0,
-            format="%e",
-            step=0.1,
+        radmax = float(
+            st.number_input(
+                "Maximum grain size $r_{\\rm max}$ [micron]:",
+                value=1.0,
+                format="%.6e",
+            )
         )
-        nrad = st.number_input(
-            "Number of size bins:", value=100, format="%d", step=1, min_value=1
+        nrad = int(
+            st.number_input(
+                "Number of size bins:",
+                value=100,
+                format="%d",
+                step=1,
+                min_value=1
+            )
         )
 
 st.divider()
@@ -164,16 +239,53 @@ col1, col2 = st.columns(2)
 with col1:
     doSA = st.checkbox("Calculate scattering matrix elements", value=False)
 with col2:
-    nang2 = st.number_input(
-        "Number of scattering angles in the intervall $0$ to $\\pi$ (equidistantly distributed, must be odd):",
-        value=91,
-        format="%d",
-        step=2,
-        min_value=1,
-        disabled=(not doSA),
+    nang2 = int(
+        st.number_input(
+            "Number of scattering angles in the intervall $0$ to $\\pi$ (equidistantly distributed, must be odd):",
+            value=91,
+            format="%d",
+            step=2,
+            min_value=1,
+            disabled=(not doSA),
+        )
     )
 
+if nang2 % 2 == 0:
+    st.warning("Number of scattering angles must be odd")
+
 st.divider()
+
+nterm = 2e7
+eps = 1e-20
+xmin = 1e-6
+with st.expander("Numerical parameters for MIEX"):
+    col1, col2 = st.columns(2)
+    with col1:
+        nterm = int(
+            st.number_input(
+                f"Maximum number of terms to be considered (int)",
+                value=int(2e7),
+                format="%d",
+                min_value=1,
+            )
+        )
+        eps = float(
+            st.number_input(
+                f"Accuracy to be achieved (float)",
+                value=1.0e-20,
+                format="%.6e",
+                min_value=1.0e-100,
+            )
+        )
+    with col2:
+        xmin = float(
+            st.number_input(
+                f"Minimum size parameter (float)",
+                value=1.0e-6,
+                format="%.6e",
+                min_value=1.0e-100,
+            )
+        )
 
 col1, col2 = st.columns(2)
 with col1:
@@ -188,9 +300,47 @@ if run_miex:
     # ---------------------------------------------------------------------------------------------------
     # 2. Read data files & Prepare the calculations
     # ---------------------------------------------------------------------------------------------------
-    wavelength = np.zeros(nlam)
-    ri_real = np.zeros((ncomp, nlam))
-    ri_imag = np.zeros((ncomp, nlam))
+
+    if nang2 % 2 == 1:
+        nang = int(0.5 * (nang2 - 1) + 1)
+    else:
+        st.error("Number of scattering angles must be odd")
+        st.stop()
+
+    wavelength = np.geomspace(lammin, lammax, nlam)
+    ri_real = np.empty(ncomp, dtype=object)
+    ri_imag = np.empty(ncomp, dtype=object)
+    if radio_wavelength == "single":
+        ri_real[0] = input_ri_real
+        ri_imag[0] = input_ri_imag
+    else:
+        # read lambda/n/k database
+        for icomp in range(ncomp):
+            if fnames[icomp] is None:
+                st.error("Dust data file missing")
+                st.stop()
+
+            w_tmp, n_tmp, k_tmp = np.loadtxt(fnames[icomp], comments="#", unpack=True)
+            w_tmp = np.atleast_1d(w_tmp)
+            n_tmp = np.atleast_1d(n_tmp)
+            k_tmp = np.atleast_1d(k_tmp)
+
+            if wavelength[0] < w_tmp[0] or wavelength[-1] > w_tmp[-1]:
+                st.warning(f"Defined wavelength for {fnames[icomp].name} is out of the range of the dust catalog")
+
+            real_interp = interp1d_log(
+                w_tmp,
+                n_tmp,
+                fill_value="extrapolate",
+            )
+            imag_interp = interp1d_log(
+                w_tmp,
+                n_tmp,
+                fill_value="extrapolate",
+            )
+            ri_real[icomp] = real_interp
+            ri_imag[icomp] = imag_interp
+
 
     q_ext = np.zeros(nlam)
     q_sca = np.zeros(nlam)
@@ -212,60 +362,13 @@ if run_miex:
     S33 = np.zeros((nang2, nlam))
     S34 = np.zeros((nang2, nlam))
 
-    if np.sum(abun) != 1:
-        st.warning("Warning: The sum of the relative abundances is not 100 %")
-
-    if nang2 % 2 == 1:
-        nang = int(0.5 * (nang2 - 1) + 1)
-    else:
-        st.error("Error: Number of scattering angles must be odd!")
-        st.stop()
-
-    if radio_wavelength == "single":
-        wavelength = input_wavelength
-        ri_real[0] = input_ri_real
-        ri_imag[0] = input_ri_imag
-    else:
-        # read lambda/n/k database
-        for icomp in range(ncomp):
-            if fnames[icomp] is None:
-                st.error("Error: Dust data file missing!")
-                st.stop()
-
-            w, n, k = np.loadtxt(fnames[icomp], comments="#", unpack=True)
-
-            if isinstance(w, float):
-                if nlam == 1:
-                    wavelength = np.array([w])
-                    ri_real[icomp] = np.array([n])
-                    ri_imag[icomp] = np.array([k])
-                else:
-                    st.error(
-                        "Error: Number of defined wavelengths is larger than the number of wavelengths given in the file"
-                    )
-                    st.stop()
-            else:
-                if nlam <= len(w):
-                    if icomp > 0 and not np.array_equal(wavelength, w[:nlam]):
-                        st.error("Wavelength distribution in dust data files do not match.")
-                        st.stop()
-
-                    wavelength = w[:nlam]
-                    ri_real[icomp] = n[:nlam]
-                    ri_imag[icomp] = k[:nlam]
-                else:
-                    st.error(
-                        "Error: Number of defined wavelengths is larger than the number of wavelengths given in the file"
-                    )
-                    st.stop()
-
     # define radial step width
     radminlog = np.log10(radmin)
     radmaxlog = np.log10(radmax)
     if nrad > 1:
-        steplog = (radmaxlog - radminlog) / (nrad - 1.0)
+        radsteplog = (radmaxlog - radminlog) / (nrad - 1.0)
     else:
-        steplog = 0.0
+        radsteplog = 0.0
 
     # ---------------------------------------------------------------------------------------------------
     # 3. Run the Mie scattering routines
@@ -287,12 +390,12 @@ if run_miex:
                 counter += 1
                 if int(counter % ((nlam * ncomp * nrad) / 10)) == 0:
                     progress_bar.progress(
-                        int(counter / (nlam * ncomp * nrad) * 100), text=progress_text
+                        int(counter / (nlam * ncomp * nrad + 1) * 100), text=progress_text
                     )
 
                 # current radius / radius interval
-                rad = 10.0 ** (radminlog + irad * steplog)
-                rad1 = 10.0 ** (radminlog + (irad + 1.0) * steplog)
+                rad = 10.0 ** (radminlog + irad * radsteplog)
+                rad1 = 10.0 ** (radminlog + (irad + 1.0) * radsteplog)
                 if nrad > 1:
                     delrad = rad1 - rad
                 else:
@@ -302,12 +405,15 @@ if run_miex:
                 x = 2.0 * np.pi * rad * refmed / wavelength[ilam]
 
                 # complex refractive index
-                ri = complex(ri_real[icomp, ilam], ri_imag[icomp, ilam]) / refmed
+                if radio_wavelength == "single":
+                    ri = complex(ri_real[icomp], ri_imag[icomp]) / refmed
+                else:
+                    ri = complex(ri_real[icomp](wavelength[ilam]), ri_imag[icomp](wavelength[ilam])) / refmed
 
                 try:
                     # derive the scattering parameters
                     q_extx, q_absx, q_scax, q_bkx, q_prx, albedox, g_scax, S1x, S2x = (
-                        miex.shexqnn2(x, ri, nang, doSA)
+                        miex.shexqnn2(x, ri, nang, doSA, nterm=nterm, eps=eps, xmin=xmin)
                     )
                 except Exception as e:
                     st.error(e)
@@ -370,8 +476,8 @@ if run_miex:
     output_file += f"# Number of wavelengths            : {nlam}\n"
     output_file += f"# Number of chemical components    : {ncomp}\n"
     if radio_wavelength == "single":
-        output_file += f"# Real part of refractive index    : {ri_real[0,0]}\n"
-        output_file += f"# Imag part of refractive index    : {ri_imag[0,0]}\n"
+        output_file += f"# Real part of refractive index    : {ri_real[0]}\n"
+        output_file += f"# Imag part of refractive index    : {ri_imag[0]}\n"
         output_file += f"# Wavelength [micron]              : {wavelength[0]}\n"
     else:
         output_file += "# Relative abundances [%]          :\n"
@@ -508,7 +614,7 @@ if run_miex:
             ax[0].plot(wavelength, c_sca, label="scattering")
             ax[0].plot(wavelength, c_bk, label="backscattering")
 
-            ax[0].set_ylabel(r"cross section [m$^2$]")
+            ax[0].set_ylabel("cross section [m$^2$]")
             ax[0].set_yscale("log")
             ax[0].legend()
 

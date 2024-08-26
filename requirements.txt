@@ -3,3 +3,4 @@ numpy
 numba
 matplotlib
 pandas
+scipy
