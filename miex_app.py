@@ -1,17 +1,7 @@
 from src.miex import miex
 import numpy as np
-import matplotlib.pyplot as plt
-import pandas as pd
 import streamlit as st
 from scipy.interpolate import interp1d
-
-
-def interp1d_log(xx, yy, kind="linear", fill_value=np.nan):
-    logx = np.log10(xx)
-    logy = np.log10(yy)
-    lin_interp = interp1d(logx, logy, kind=kind, fill_value=fill_value)
-    log_interp = lambda zz: np.power(10.0, lin_interp(np.log10(zz)))
-    return log_interp
 
 
 st.set_page_config(page_title="MIEX", page_icon=None)
@@ -87,7 +77,7 @@ if radio_wavelength == "single":
         )
 else:
     st.info(
-        "All data files have to contain three columns (wavelength/micron real imag). Values are log-linearly interpolated. See https://github.com/mlietzow/MIEX-Python/tree/main/ri-data for exemplary files."
+        "All data files have to contain three columns (wavelength/micron real imag). Values are log-linearly interpolated and mixed with the Bruggeman formula. See https://github.com/mlietzow/MIEX-Python/tree/main/ri-data for exemplary files."
     )
     with col1:
         lammin = float(
@@ -146,7 +136,7 @@ else:
         if fnames[icomp] is None:
             st.warning("Dust data file missing")
 
-    if np.sum(abun) != 100:
+    if np.sum(abun) != 100.0:
         st.warning("The sum of the relative abundances is not 100 %")
 
     abun /= np.sum(abun)
@@ -255,13 +245,13 @@ if nang2 % 2 == 0:
 
 st.divider()
 
-nterm = 2e7
-eps = 1e-20
-xmin = 1e-6
+nterm_mie = 2e7
+eps_mie = 1e-20
+xmin_mie = 1e-6
 with st.expander("Numerical parameters for MIEX"):
     col1, col2 = st.columns(2)
     with col1:
-        nterm = int(
+        nterm_mie = int(
             st.number_input(
                 f"Maximum number of terms to be considered (int)",
                 value=int(2e7),
@@ -269,7 +259,7 @@ with st.expander("Numerical parameters for MIEX"):
                 min_value=1,
             )
         )
-        eps = float(
+        eps_mie = float(
             st.number_input(
                 f"Accuracy to be achieved (float)",
                 value=1.0e-20,
@@ -278,7 +268,7 @@ with st.expander("Numerical parameters for MIEX"):
             )
         )
     with col2:
-        xmin = float(
+        xmin_mie = float(
             st.number_input(
                 f"Minimum size parameter (float)",
                 value=1.0e-6,
@@ -297,6 +287,7 @@ st.divider()
 st.write("The original source code written in FORTRAN90 is distributed under the [CPC license](https://www.elsevier.com/about/policies/open-access-licenses/elsevier-user-license/cpc-license). Modified and ported to Python with permission of S. Wolf.")
 
 if run_miex:
+    placeholder = st.empty()
     # ---------------------------------------------------------------------------------------------------
     # 2. Read data files & Prepare the calculations
     # ---------------------------------------------------------------------------------------------------
@@ -308,12 +299,25 @@ if run_miex:
         st.stop()
 
     wavelength = np.geomspace(lammin, lammax, nlam)
-    ri_real = np.empty(ncomp, dtype=object)
-    ri_imag = np.empty(ncomp, dtype=object)
+    ri_real = np.zeros(nlam)
+    ri_imag = np.zeros(nlam)
     if radio_wavelength == "single":
         ri_real[0] = input_ri_real
         ri_imag[0] = input_ri_imag
     else:
+        def interp1d_log(xx, yy, kind="linear", fill_value=np.nan):
+            logx = np.log10(xx)
+            logy = np.log10(yy)
+            lin_interp = interp1d(logx, logy, kind=kind, fill_value=fill_value)
+            log_interp = lambda zz: np.power(10.0, lin_interp(np.log10(zz)))
+            return log_interp
+
+        
+        with placeholder.container():
+            progress_text = "Mixing materials ..."
+            progress_bar = st.progress(0, text=progress_text)
+
+        eps_comp = np.zeros((ncomp, nlam), dtype=complex)
         # read lambda/n/k database
         for icomp in range(ncomp):
             if fnames[icomp] is None:
@@ -335,11 +339,26 @@ if run_miex:
             )
             imag_interp = interp1d_log(
                 w_tmp,
-                n_tmp,
+                k_tmp,
                 fill_value="extrapolate",
             )
-            ri_real[icomp] = real_interp
-            ri_imag[icomp] = imag_interp
+            eps_comp[icomp] = (real_interp(wavelength) + 1j * imag_interp(wavelength))**2
+
+        from mpmath import findroot
+        eps_mean = np.zeros(nlam, dtype=complex)
+        counter = 0
+        for ilam in range(nlam):
+            def bruggeman_mix(x):
+                return np.sum(abun * ((eps_comp[:,ilam] - x) / (eps_comp[:,ilam] + 2 * x)))
+
+            counter += 1
+            if int(counter % (nlam / 10)) == 0:
+                progress_bar.progress(int(counter / nlam * 100), text=progress_text)
+
+            eps_mean[ilam] = complex(findroot(bruggeman_mix, complex(1.0, 0.1)))
+
+        ri_real = np.real(np.sqrt(eps_mean))
+        ri_imag = np.imag(np.sqrt(eps_mean))
 
 
     q_ext = np.zeros(nlam)
@@ -374,7 +393,6 @@ if run_miex:
     # 3. Run the Mie scattering routines
     # ---------------------------------------------------------------------------------------------------
     counter = 0
-    placeholder = st.empty()
     with placeholder.container():
         progress_text = "Calculating optical properties ..."
         progress_bar = st.progress(0, text=progress_text)
@@ -384,71 +402,67 @@ if run_miex:
         wqsc = 0.0
         refmed = 1.0
 
-        for icomp in range(ncomp):
-            for irad in range(nrad):
-                # show progress every 10 per cent
-                counter += 1
-                if int(counter % ((nlam * ncomp * nrad) / 10)) == 0:
-                    progress_bar.progress(
-                        int(counter / (nlam * ncomp * nrad + 1) * 100), text=progress_text
-                    )
+        for irad in range(nrad):
+            # show progress every 10 per cent
+            counter += 1
+            if int(counter % ((nlam * nrad) / 10)) == 0:
+                progress_bar.progress(
+                    int(counter / (nlam * nrad + 1) * 100), text=progress_text
+                )
 
-                # current radius / radius interval
-                rad = 10.0 ** (radminlog + irad * radsteplog)
-                rad1 = 10.0 ** (radminlog + (irad + 1.0) * radsteplog)
-                if nrad > 1:
-                    delrad = rad1 - rad
-                else:
-                    delrad = 1.0
+            # current radius / radius interval
+            rad = 10.0 ** (radminlog + irad * radsteplog)
+            rad1 = 10.0 ** (radminlog + (irad + 1.0) * radsteplog)
+            if nrad > 1:
+                delrad = rad1 - rad
+            else:
+                delrad = 1.0
 
-                # size parameter
-                x = 2.0 * np.pi * rad * refmed / wavelength[ilam]
+            # size parameter
+            x = 2.0 * np.pi * rad * refmed / wavelength[ilam]
 
-                # complex refractive index
-                if radio_wavelength == "single":
-                    ri = complex(ri_real[icomp], ri_imag[icomp]) / refmed
-                else:
-                    ri = complex(ri_real[icomp](wavelength[ilam]), ri_imag[icomp](wavelength[ilam])) / refmed
+            # complex refractive index
+            ri = complex(ri_real[ilam], ri_imag[ilam]) / refmed
 
-                try:
-                    # derive the scattering parameters
-                    q_extx, q_absx, q_scax, q_bkx, q_prx, albedox, g_scax, S1x, S2x = (
-                        miex.shexqnn2(x, ri, nang, doSA, nterm=nterm, eps=eps, xmin=xmin)
-                    )
-                except Exception as e:
-                    st.error(e)
-                    st.stop()
+            try:
+                # derive the scattering parameters
+                q_extx, q_absx, q_scax, q_bkx, q_prx, albedox, g_scax, S1x, S2x = (
+                    miex.shexqnn2(x, ri, nang, doSA, nterm=nterm_mie, eps=eps_mie, xmin=xmin_mie)
+                )
+            except Exception as e:
+                st.error(e)
+                st.stop()
 
-                # update average values
-                weight = abun[icomp] * rad**exponent * delrad
-                if "exponential" in dist_type:
-                    weight *= np.exp(-rad / parameter2)
-                weisum = weisum + weight
+            # update average values
+            weight = rad**exponent * delrad
+            if "exponential" in dist_type:
+                weight *= np.exp(-rad / parameter2)
+            weisum = weisum + weight
 
-                wradx = np.pi * (rad * 1.0e-6) ** 2 * weight
-                wqscx = wradx * q_scax
+            wradx = np.pi * (rad * 1.0e-6) ** 2 * weight
+            wqscx = wradx * q_scax
 
-                wrad += wradx
-                wqsc += wqscx
+            wrad += wradx
+            wqsc += wqscx
 
-                c_ext[ilam] += q_extx * wradx
-                c_sca[ilam] += q_scax * wradx
-                c_bk[ilam] += q_bkx * wradx
-                c_abs[ilam] += q_absx * wradx
+            c_ext[ilam] += q_extx * wradx
+            c_sca[ilam] += q_scax * wradx
+            c_bk[ilam] += q_bkx * wradx
+            c_abs[ilam] += q_absx * wradx
 
-                q_ext[ilam] += q_extx * wradx
-                q_sca[ilam] += q_scax * wradx
-                q_bk[ilam] += q_bkx * wradx
-                q_abs[ilam] += q_absx * wradx
+            q_ext[ilam] += q_extx * wradx
+            q_sca[ilam] += q_scax * wradx
+            q_bk[ilam] += q_bkx * wradx
+            q_abs[ilam] += q_absx * wradx
 
-                g_sca[ilam] += g_scax * wqscx
+            g_sca[ilam] += g_scax * wqscx
 
-                S11x, S12x, S33x, S34x = miex.scattering_matrix_elements(S1x, S2x)
+            S11x, S12x, S33x, S34x = miex.scattering_matrix_elements(S1x, S2x)
 
-                S11[:, ilam] += S11x * weight
-                S12[:, ilam] += S12x * weight
-                S33[:, ilam] += S33x * weight
-                S34[:, ilam] += S34x * weight
+            S11[:, ilam] += S11x * weight
+            S12[:, ilam] += S12x * weight
+            S33[:, ilam] += S33x * weight
+            S34[:, ilam] += S34x * weight
 
         c_ext[ilam] /= weisum
         c_sca[ilam] /= weisum
@@ -576,7 +590,11 @@ if run_miex:
     # ---------------------------------------------------------------------------------------------------
 
     if plot_res:
-        placeholder.info("Plotting results ...")
+        with placeholder.container():
+            st.info("Plotting results ...")
+
+        import pandas as pd
+        import matplotlib.pyplot as plt
 
         if nlam == 1:
             data_dict = {
