@@ -325,7 +325,7 @@ if run_miex:
             k_tmp = np.atleast_1d(k_tmp)
 
             if wavelength[0] < w_tmp[0] or wavelength[-1] > w_tmp[-1]:
-                st.warning(f"Defined wavelength for {fnames[icomp].name} is out of the range of the dust catalog")
+                st.warning(f"Defined wavelength is out of the range of the dust catalog for {fnames[icomp].name}")
 
             real_interp = interp1d_log(
                 w_tmp,
