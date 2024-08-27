@@ -44,7 +44,6 @@ nlam = 1
 ncomp = 1
 abun = np.array([1.0])
 
-col1, col2 = st.columns(2)
 if radio_wavelength == "single":
     col1, col2 = st.columns(2)
     with col1:
@@ -56,6 +55,15 @@ if radio_wavelength == "single":
                 min_value=0.0,
             )
         )
+        input_ri_imag = float(
+            st.number_input(
+                "Imaginary part of refractive index:",
+                value=0.0,
+                format="%.6e",
+                min_value=0.0,
+            )
+        )
+    with col2:
         lammin = float(
             st.number_input(
                 "Wavelength $\\lambda$ [micron]:",
@@ -66,25 +74,35 @@ if radio_wavelength == "single":
             )
         )
         lammax = lammin
-    with col2:
-        input_ri_imag = float(
-            st.number_input(
-                "Imaginary part of refractive index:",
-                value=0.0,
-                format="%.6e",
-                min_value=0.0,
-            )
-        )
+
 else:
     st.info(
         "All data files have to contain three columns (wavelength/micron real imag). Values are log-linearly interpolated and mixed with the Bruggeman formula. See https://github.com/mlietzow/MIEX-Python/tree/main/ri-data for exemplary files."
     )
+    col1, col2 = st.columns(2)
     with col1:
         lammin = float(
             st.number_input(
                 "Minimum wavelength $\\lambda_{\\rm min}$ [micron]:",
                 value=0.1,
                 format="%.6e",
+            )
+        )
+        lammax = float(
+            st.number_input(
+                "Maximum wavelength $\\lambda_{\\rm max}$ [micron]:",
+                value=10.0,
+                format="%.6e",
+            )
+        )
+    with col2:
+        nlam = int(
+            st.number_input(
+                "Number of wavelength bins:",
+                value=100,
+                format="%d",
+                step=1,
+                min_value=1
             )
         )
         ncomp = int(
@@ -96,24 +114,9 @@ else:
                 min_value=1
             )
         )
-    with col2:
-        lammax = float(
-            st.number_input(
-                "Maximum wavelength $\\lambda_{\\rm max}$ [micron]:",
-                value=10.0,
-                format="%.6e",
-            )
-        )
-        nlam = int(
-            st.number_input(
-                "Number of wavelength bins:",
-                value=100,
-                format="%d",
-                step=1,
-                min_value=1
-            )
-        )
-        st.write("")
+
+    st.divider()
+    col1, col2 = st.columns(2)
 
     abun = np.ones(ncomp) * 100.0
     for icomp in range(ncomp):
@@ -156,7 +159,7 @@ radmax = 1.0
 exponent = 0.0
 parameter2 = 1.0
 nrad = 1
-dist_type = ""
+dist_type = "Power law"
 
 col1, col2 = st.columns(2)
 if radio_grain == "single":
@@ -178,14 +181,31 @@ else:
             horizontal=True,
         )
     )
-    st.caption("Power law: $n(r) \\propto r^q$")
-    st.caption("Power law with exponential decay: $n(r) \\propto r^q \\times \\exp(-r / p)$")
+    st.write("Power law: $n(r) \\propto r^q$")
+    st.write("Power law with exponential decay: $n(r) \\propto r^q \\times \\exp(-r / p)$")
     with col1:
         radmin = float(
             st.number_input(
                 "Minimum grain size $r_{\\rm min}$ [micron]:",
                 value=0.01,
                 format="%.6e",
+            )
+        )
+        radmax = float(
+            st.number_input(
+                "Maximum grain size $r_{\\rm max}$ [micron]:",
+                value=1.0,
+                format="%.6e",
+            )
+        )
+    with col2:
+        nrad = int(
+            st.number_input(
+                "Number of size bins:",
+                value=100,
+                format="%d",
+                step=1,
+                min_value=1
             )
         )
         exponent = float(
@@ -196,30 +216,13 @@ else:
                 max_value=0.0,
             )
         )
-        if "exponential" in dist_type:
-            parameter2 = float(
-                st.number_input(
-                    "Exponential decay parameter $p$",
-                    value=1.0,
-                    format="%.6e",
-                    min_value=0.0,
-                )
-            )
-    with col2:
-        radmax = float(
+        parameter2 = float(
             st.number_input(
-                "Maximum grain size $r_{\\rm max}$ [micron]:",
+                "Exponential decay parameter $p$",
                 value=1.0,
                 format="%.6e",
-            )
-        )
-        nrad = int(
-            st.number_input(
-                "Number of size bins:",
-                value=100,
-                format="%d",
-                step=1,
-                min_value=1
+                min_value=0.0,
+                disabled=("exponential" not in dist_type),
             )
         )
 
@@ -597,6 +600,10 @@ if run_miex:
 
         import pandas as pd
         import matplotlib.pyplot as plt
+        plt.rcParams.update({
+            "xtick.top": True,
+            "ytick.right": True,
+        })
 
         if nlam == 1:
             data_dict = {
@@ -654,6 +661,7 @@ if run_miex:
             # ax[2].set_yscale("log")
             ax[2].set_xlabel("wavelength [micron]")
             ax[2].set_xscale("log")
+            ax[2].set_xlim(wavelength[0], wavelength[-1])
             ax[2].legend()
 
             st.pyplot(fig, use_container_width=True)
@@ -685,6 +693,9 @@ if run_miex:
                 ax[1, 1].set_ylabel("S34 / S11")
                 ax[1, 1].yaxis.set_label_position("right")
                 ax[1, 1].yaxis.tick_right()
+
+                ax[1, 1].set_xlim(0, 180)
+                ax[1, 1].set_xticks(np.arange(0, 181, 45))
 
             else:
                 fig, ax = plt.subplots(
@@ -746,6 +757,10 @@ if run_miex:
                 ax[1, 1].set_title("S34 / S11")
                 ax[1, 1].set_xlabel("scattering angle [deg]")
                 fig.colorbar(im, ax=ax[1, 1])
+
+                ax[1, 1].set_xlim(0, 180)
+                ax[1, 1].set_xticks(np.arange(0, 181, 45))
+                ax[1, 1].set_ylim(wavelength[0], wavelength[-1])
 
             st.pyplot(fig, use_container_width=True)
 
