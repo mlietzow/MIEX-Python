@@ -121,7 +121,7 @@ result = miex.shexqnn2(x=1.0, m=complex(1.5, 0.0), nang=91, doSA=True)
 | ------------- | -------------------------------------------------------- | --------------- |
 | `x`           | Size parameter                                           | float           |
 | `m`           | Complex refractive index                                 | complex         |
-| `nang=1`      | Half number of scattering angles in the interval [0, 90] | int, optional   |
+| `nang=2`      | Half number of scattering angles in the interval [0, 90] | int, optional   |
 | `doSA=False`  | Calculate scattering amplitude functions                 | bool, optional  |
 | `nterm=2e7`   | Maximum number of terms to be considered                 | int, optional   |
 | `eps=1.0e-20` | Accuracy to be achieved                                  | float, optional |

@@ -73,7 +73,7 @@ def aa2(ax, ri, num, ru):
 
 
 @njit(cache=True)
-def shexqnn2(x, ri, nang=1, doSA=False, nterm=2e7, eps=1.0e-20, xmin=1.0e-06):
+def shexqnn2(x, ri, nang=2, doSA=False, nterm=2e7, eps=1.0e-20, xmin=1.0e-06):
     """Derive quantities for a single size parameter and chemical composition.
     This routine is based on the routine 'shexqnn' published by
     N.V.Voshchinnikov: 'Optics of Cosmic Dust', Astrophysics and Space Physics Review 12, 1 (2002)
@@ -86,7 +86,7 @@ def shexqnn2(x, ri, nang=1, doSA=False, nterm=2e7, eps=1.0e-20, xmin=1.0e-06):
     ri : complex float
         complex refractive index
 
-    nang : int, optional, default = 1
+    nang : int, optional, default = 2
         half number of scattering angles theta in the intervall 0...pi/2 (equidistantly distributed)
 
     doSA : bool, optional, default = False
