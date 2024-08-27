@@ -109,20 +109,23 @@ streamlit run miex_app.py
 
 ## Import MIEX
 
-[miex.py](miex.py) can be imported and used in any python script (see [jupyter notebook 1](miex_notebook_1.ipynb) or [jupyter notebook 2](miex_notebook_2.ipynb)):
+[miex.py](src/miex.py) can be imported and used in any python script (see [jupyter notebook 1](miex_notebook_1.ipynb) or [jupyter notebook 2](miex_notebook_2.ipynb)).
 
 To calculate the efficiency factors and scattering amplitude functions (optionally), use e.g.,
 
 ```python
-miex.shexqnn2(x=1.0, m=complex(1.5, 0.0), nang=91, doSA=True)
+result = miex.shexqnn2(x=1.0, m=complex(1.5, 0.0), nang=91, doSA=True)
 ```
 
-| Variable     | Input Parameter                                          | Type           |
-| ------------ | -------------------------------------------------------- | -------------- |
-| `x`          | Size parameter                                           | float          |
-| `m`          | Complex refractive index                                 | complex        |
-| `nang=1`     | Half number of scattering angles in the interval [0, 90] | int, optional  |
-| `doSA=False` | Calculate scattering amplitude functions                 | bool, optional |
+| Variable      | Input Parameter                                          | Type            |
+| ------------- | -------------------------------------------------------- | --------------- |
+| `x`           | Size parameter                                           | float           |
+| `m`           | Complex refractive index                                 | complex         |
+| `nang=1`      | Half number of scattering angles in the interval [0, 90] | int, optional   |
+| `doSA=False`  | Calculate scattering amplitude functions                 | bool, optional  |
+| `nterm=2e7`   | Maximum number of terms to be considered                 | int, optional   |
+| `eps=1.0e-20` | Accuracy to be achieved                                  | float, optional |
+| `xmin=1.0e-6` | Minimum size parameter                                   | float, optional |
 
 | Variable      | Output Parameter              | Type                | Index |
 | ------------- | ------------------------------| ------------------- | ----- |
@@ -141,7 +144,7 @@ The scattering amplitude functions are an array with size `2*nang-1`.
 To calculate the scattering matrix elements, use
 
 ```python
-miex.scattering_matrix_elements(S1, S2)
+sca_mat = miex.scattering_matrix_elements(S1, S2)
 ```
 
 where $S_1$ and $S_2$​ are the scattering amplitude functions.
@@ -164,7 +167,8 @@ python3 test_miex.py
     ├── README.me
     ├── example1.input                           # Exemplary input file
     ├── example2.input                           # Exemplary input file
-    ├── miex.py                                  # Source code of MIEX
+    ├── src
+    │   └── miex.py                              # Source code of MIEX
     ├── miex_app.py                              # Python script to run MIEX via Streamlit
     ├── miex_notebook_1.ipynb                    # Jupyter notebook on how to use MIEX (basic)
     ├── miex_notebook_2.ipynb                    # Jupyter notebook on how to use MIEX (advanced)
