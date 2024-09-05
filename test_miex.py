@@ -1,4 +1,4 @@
-from src.miex import miex
+import miex.miex
 import unittest
 import numpy as np
 
@@ -20,17 +20,18 @@ class test_miex(unittest.TestCase):
         radius = 0.525
         x = 2.0 * np.pi * radius / lambda0
 
-        result = miex.shexqnn2(x=x, ri=ri, nang=11, doSA=True)
+        result = miex.get_mie_coefficients(x=x, ri=ri, nang=11, doSA=True)
 
-        self.assertAlmostEqual(result[0], 3.10543, msg="incorrect Q_ext", delta=0.00001)
-        self.assertAlmostEqual(result[1], 0.00000, msg="incorrect Q_abs", delta=0.00001)
-        self.assertAlmostEqual(result[2], 3.10543, msg="incorrect Q_sca", delta=0.00001)
-        self.assertAlmostEqual(result[3], 2.92534, msg="incorrect Q_bk", delta=0.00001)
+        self.assertAlmostEqual(result["Q_ext"], 3.10543, msg="incorrect Q_ext", delta=0.00001)
+        self.assertAlmostEqual(result["Q_abs"], 0.00000, msg="incorrect Q_abs", delta=0.00001)
+        self.assertAlmostEqual(result["Q_sca"], 3.10543, msg="incorrect Q_sca", delta=0.00001)
+        self.assertAlmostEqual(result["Q_bk"], 2.92534, msg="incorrect Q_bk", delta=0.00001)
 
-        S_11, S_12, S_33, S_34 = miex.scattering_matrix_elements(result[7], result[8])
-        S_12 /= -S_11
-        S_33 /= S_11
-        S_34 /= S_11
+        scat_mat = miex.get_scattering_matrix_elements(result["SA_1"], result["SA_2"])
+        S_11 = scat_mat["S_11"]
+        S_12 = -scat_mat["S_12"] / S_11
+        S_33 = scat_mat["S_33"] / S_11
+        S_34 = scat_mat["S_34"] / S_11
         S_11 /= S_11[0]
 
         bh_S_11 = np.array(
@@ -147,22 +148,24 @@ class test_miex(unittest.TestCase):
         ri = complex(1.5, 0)
         x = 10.0
 
-        result = miex.shexqnn2(x=x, ri=ri, nang=19, doSA=True)
+        result = miex.get_mie_coefficients(x=x, ri=ri, nang=19, doSA=True)
 
         self.assertAlmostEqual(
-            result[0], 2.881999, msg="incorrect Q_ext", delta=0.000001
+            result["Q_ext"], 2.881999, msg="incorrect Q_ext", delta=0.000001
         )
         self.assertAlmostEqual(
-            result[1], 0.000000, msg="incorrect Q_abs", delta=0.000001
+            result["Q_abs"], 0.000000, msg="incorrect Q_abs", delta=0.000001
         )
         self.assertAlmostEqual(
-            result[2], 2.881999, msg="incorrect Q_sca", delta=0.000001
+            result["Q_sca"], 2.881999, msg="incorrect Q_sca", delta=0.000001
         )
         self.assertAlmostEqual(
-            result[6], 0.742913, msg="incorrect g_sca", delta=0.000001
+            result["g_sca"], 0.742913, msg="incorrect g_sca", delta=0.000001
         )
 
-        S_11, S_12, _, _ = miex.scattering_matrix_elements(result[7], result[8])
+        scat_mat = miex.get_scattering_matrix_elements(result["SA_1"], result["SA_2"])
+        S_11 = scat_mat["S_11"]
+        S_12 = scat_mat["S_12"]
         S_12 /= S_11
 
         w_S_11 = np.array(
@@ -259,22 +262,24 @@ class test_miex(unittest.TestCase):
         ri = complex(1.5, 0)
         x = 100.0
 
-        result = miex.shexqnn2(x=x, ri=ri, nang=19, doSA=True)
+        result = miex.get_mie_coefficients(x=x, ri=ri, nang=19, doSA=True)
 
         self.assertAlmostEqual(
-            result[0], 2.094388, msg="incorrect Q_ext", delta=0.000001
+            result["Q_ext"], 2.094388, msg="incorrect Q_ext", delta=0.000001
         )
         self.assertAlmostEqual(
-            result[1], 0.000000, msg="incorrect Q_abs", delta=0.000001
+            result["Q_abs"], 0.000000, msg="incorrect Q_abs", delta=0.000001
         )
         self.assertAlmostEqual(
-            result[2], 2.094388, msg="incorrect Q_sca", delta=0.000001
+            result["Q_sca"], 2.094388, msg="incorrect Q_sca", delta=0.000001
         )
         self.assertAlmostEqual(
-            result[6], 0.818246, msg="incorrect g_sca", delta=0.000001
+            result["g_sca"], 0.818246, msg="incorrect g_sca", delta=0.000001
         )
 
-        S_11, S_12, _, _ = miex.scattering_matrix_elements(result[7], result[8])
+        scat_mat = miex.get_scattering_matrix_elements(result["SA_1"], result["SA_2"])
+        S_11 = scat_mat["S_11"]
+        S_12 = scat_mat["S_12"]
         S_12 /= S_11
 
         w_S_11 = np.array(
@@ -371,22 +376,24 @@ class test_miex(unittest.TestCase):
         ri = complex(1.5, 0)
         x = 1000.0
 
-        result = miex.shexqnn2(x=x, ri=ri, nang=19, doSA=True)
+        result = miex.get_mie_coefficients(x=x, ri=ri, nang=19, doSA=True)
 
         self.assertAlmostEqual(
-            result[0], 2.013945, msg="incorrect Q_ext", delta=0.000001
+            result["Q_ext"], 2.013945, msg="incorrect Q_ext", delta=0.000001
         )
         self.assertAlmostEqual(
-            result[1], 0.000000, msg="incorrect Q_abs", delta=0.000001
+            result["Q_abs"], 0.000000, msg="incorrect Q_abs", delta=0.000001
         )
         self.assertAlmostEqual(
-            result[2], 2.013945, msg="incorrect Q_sca", delta=0.000001
+            result["Q_sca"], 2.013945, msg="incorrect Q_sca", delta=0.000001
         )
         self.assertAlmostEqual(
-            result[6], 0.827882, msg="incorrect g_sca", delta=0.000001
+            result["g_sca"], 0.827882, msg="incorrect g_sca", delta=0.000001
         )
 
-        S_11, S_12, _, _ = miex.scattering_matrix_elements(result[7], result[8])
+        scat_mat = miex.get_scattering_matrix_elements(result["SA_1"], result["SA_2"])
+        S_11 = scat_mat["S_11"]
+        S_12 = scat_mat["S_12"]
         S_12 /= S_11
 
         w_S_11 = np.array(
@@ -483,22 +490,24 @@ class test_miex(unittest.TestCase):
         ri = complex(1.5, 0)
         x = 5000.0
 
-        result = miex.shexqnn2(x=x, ri=ri, nang=19, doSA=True)
+        result = miex.get_mie_coefficients(x=x, ri=ri, nang=19, doSA=True)
 
         self.assertAlmostEqual(
-            result[0], 2.008650, msg="incorrect Q_ext", delta=0.000001
+            result["Q_ext"], 2.008650, msg="incorrect Q_ext", delta=0.000001
         )
         self.assertAlmostEqual(
-            result[1], 0.000000, msg="incorrect Q_abs", delta=0.000001
+            result["Q_abs"], 0.000000, msg="incorrect Q_abs", delta=0.000001
         )
         self.assertAlmostEqual(
-            result[2], 2.008650, msg="incorrect Q_sca", delta=0.000001
+            result["Q_sca"], 2.008650, msg="incorrect Q_sca", delta=0.000001
         )
         self.assertAlmostEqual(
-            result[6], 0.829592, msg="incorrect g_sca", delta=0.000001
+            result["g_sca"], 0.829592, msg="incorrect g_sca", delta=0.000001
         )
 
-        S_11, S_12, _, _ = miex.scattering_matrix_elements(result[7], result[8])
+        scat_mat = miex.get_scattering_matrix_elements(result["SA_1"], result["SA_2"])
+        S_11 = scat_mat["S_11"]
+        S_12 = scat_mat["S_12"]
         S_12 /= S_11
 
         w_S_11 = np.array(
@@ -595,22 +604,24 @@ class test_miex(unittest.TestCase):
         ri = complex(1.5, 0.1)
         x = 10.0
 
-        result = miex.shexqnn2(x=x, ri=ri, nang=19, doSA=True)
+        result = miex.get_mie_coefficients(x=x, ri=ri, nang=19, doSA=True)
 
         self.assertAlmostEqual(
-            result[0], 2.459791, msg="incorrect Q_ext", delta=0.000001
+            result["Q_ext"], 2.459791, msg="incorrect Q_ext", delta=0.000001
         )
         self.assertAlmostEqual(
-            result[1], 1.224646, msg="incorrect Q_abs", delta=0.000001
+            result["Q_abs"], 1.224646, msg="incorrect Q_abs", delta=0.000001
         )
         self.assertAlmostEqual(
-            result[2], 1.235144, msg="incorrect Q_sca", delta=0.000001
+            result["Q_sca"], 1.235144, msg="incorrect Q_sca", delta=0.000001
         )
         self.assertAlmostEqual(
-            result[6], 0.922350, msg="incorrect g_sca", delta=0.000001
+            result["g_sca"], 0.922350, msg="incorrect g_sca", delta=0.000001
         )
 
-        S_11, S_12, _, _ = miex.scattering_matrix_elements(result[7], result[8])
+        scat_mat = miex.get_scattering_matrix_elements(result["SA_1"], result["SA_2"])
+        S_11 = scat_mat["S_11"]
+        S_12 = scat_mat["S_12"]
         S_12 /= S_11
 
         w_S_11 = np.array(
@@ -707,22 +718,24 @@ class test_miex(unittest.TestCase):
         ri = complex(1.5, 0.1)
         x = 100.0
 
-        result = miex.shexqnn2(x=x, ri=ri, nang=19, doSA=True)
+        result = miex.get_mie_coefficients(x=x, ri=ri, nang=19, doSA=True)
 
         self.assertAlmostEqual(
-            result[0], 2.089822, msg="incorrect Q_ext", delta=0.000001
+            result["Q_ext"], 2.089822, msg="incorrect Q_ext", delta=0.000001
         )
         self.assertAlmostEqual(
-            result[1], 0.957688, msg="incorrect Q_abs", delta=0.000001
+            result["Q_abs"], 0.957688, msg="incorrect Q_abs", delta=0.000001
         )
         self.assertAlmostEqual(
-            result[2], 1.132134, msg="incorrect Q_sca", delta=0.000001
+            result["Q_sca"], 1.132134, msg="incorrect Q_sca", delta=0.000001
         )
         self.assertAlmostEqual(
-            result[6], 0.950392, msg="incorrect g_sca", delta=0.000001
+            result["g_sca"], 0.950392, msg="incorrect g_sca", delta=0.000001
         )
 
-        S_11, S_12, _, _ = miex.scattering_matrix_elements(result[7], result[8])
+        scat_mat = miex.get_scattering_matrix_elements(result["SA_1"], result["SA_2"])
+        S_11 = scat_mat["S_11"]
+        S_12 = scat_mat["S_12"]
         S_12 /= S_11
 
         w_S_11 = np.array(
@@ -819,22 +832,24 @@ class test_miex(unittest.TestCase):
         ri = complex(1.5, 0.1)
         x = 1000.0
 
-        result = miex.shexqnn2(x=x, ri=ri, nang=19, doSA=True)
+        result = miex.get_mie_coefficients(x=x, ri=ri, nang=19, doSA=True)
 
         self.assertAlmostEqual(
-            result[0], 2.019703, msg="incorrect Q_ext", delta=0.000001
+            result["Q_ext"], 2.019703, msg="incorrect Q_ext", delta=0.000001
         )
         self.assertAlmostEqual(
-            result[1], 0.912770, msg="incorrect Q_abs", delta=0.000001
+            result["Q_abs"], 0.912770, msg="incorrect Q_abs", delta=0.000001
         )
         self.assertAlmostEqual(
-            result[2], 1.106932, msg="incorrect Q_sca", delta=0.000001
+            result["Q_sca"], 1.106932, msg="incorrect Q_sca", delta=0.000001
         )
         self.assertAlmostEqual(
-            result[6], 0.950880, msg="incorrect g_sca", delta=0.000001
+            result["g_sca"], 0.950880, msg="incorrect g_sca", delta=0.000001
         )
 
-        S_11, S_12, _, _ = miex.scattering_matrix_elements(result[7], result[8])
+        scat_mat = miex.get_scattering_matrix_elements(result["SA_1"], result["SA_2"])
+        S_11 = scat_mat["S_11"]
+        S_12 = scat_mat["S_12"]
         S_12 /= S_11
 
         w_S_11 = np.array(
@@ -931,22 +946,24 @@ class test_miex(unittest.TestCase):
         ri = complex(1.5, 0.1)
         x = 5000.0
 
-        result = miex.shexqnn2(x=x, ri=ri, nang=19, doSA=True)
+        result = miex.get_mie_coefficients(x=x, ri=ri, nang=19, doSA=True)
 
         self.assertAlmostEqual(
-            result[0], 2.006775, msg="incorrect Q_ext", delta=0.000001
+            result["Q_ext"], 2.006775, msg="incorrect Q_ext", delta=0.000001
         )
         self.assertAlmostEqual(
-            result[1], 0.907582, msg="incorrect Q_abs", delta=0.000001
+            result["Q_abs"], 0.907582, msg="incorrect Q_abs", delta=0.000001
         )
         self.assertAlmostEqual(
-            result[2], 1.099193, msg="incorrect Q_sca", delta=0.000001
+            result["Q_sca"], 1.099193, msg="incorrect Q_sca", delta=0.000001
         )
         self.assertAlmostEqual(
-            result[6], 0.950650, msg="incorrect g_sca", delta=0.000001
+            result["g_sca"], 0.950650, msg="incorrect g_sca", delta=0.000001
         )
 
-        S_11, S_12, _, _ = miex.scattering_matrix_elements(result[7], result[8])
+        scat_mat = miex.get_scattering_matrix_elements(result["SA_1"], result["SA_2"])
+        S_11 = scat_mat["S_11"]
+        S_12 = scat_mat["S_12"]
         S_12 /= S_11
 
         w_S_11 = np.array(

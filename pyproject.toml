@@ -4,17 +4,18 @@ build-backend = "hatchling.build"
 
 [project]
 name = "miex"
-version = "1.0"
+version = "1.1"
 requires-python = ">=3.6"
 authors = [
   { name="Moritz Lietzow-Sinjen", email="mlietzow@astrophysik.uni-kiel.de" },
 ]
-description = "MIEX: Mie Scattering code for large grains"
+description = "MIEX-Python: Mie Scattering code for large grains"
 readme = "README.md"
 classifiers = [
     "Programming Language :: Python :: 3",
     "Operating System :: OS Independent",
 ]
+dependencies = ["numpy", "numba"]
 
 [project.urls]
-Homepage = "https://github.com/mlietzow/MIEX-Python"
+Repository = "https://github.com/mlietzow/MIEX-Python"

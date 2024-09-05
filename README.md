@@ -1,4 +1,4 @@
-# MIEX for Python
+# MIEX-Python
 
 is a Mie scattering code for large grains written in Python and based on [MIEX](https://ui.adsabs.harvard.edu/abs/2018ascl.soft10019W) by [Wolf & Voshchinnikov (2004)](https://ui.adsabs.harvard.edu/abs/2004CoPhC.162..113W).
 
@@ -29,7 +29,7 @@ For the original source code of MIEX written in `FORTRAN90`, we refer to
 
 ## Requirements
 
-To run MIEX for Python, at least **Python 3.6** and the following packages are required:
+To run MIEX-Python, at least **Python 3.6** and the following packages are required:
  - numba
  - numpy
 
@@ -42,55 +42,15 @@ pip3 install -r requirements.txt
 
 ## Installation
 
-The package can be installed via `pip`:
+The package can be installed via `pip`, change into the directory `MIEX-Python` and run:
 ```
-pip install MIEX-Python/
-```
-
-## Run MIEX
-
-[run_miex.py](run_miex.py) executes MIEX with the parameters of the input file:
-
-```bash
-python3 run_miex.py example1.input
-python3 run_miex.py example2.input
+pip install .
 ```
 
-The results are stored in the `results` directory.
 
-The input file is organized as follows:
+## Use MIEX-Python
 
-| Parameter                                                                      | Type  |
-| ------------------------------------------------------------------------------ | ----- |
-| Real refractive index of the surrounding medium                                | float |
-| Number of wavelengths                                                          | int   |
-| Number of components                                                           | int   |
-| Name of the dust data files (lambda/n/k data)                                  |       |
-| &ensp; 1. component                                                            | str   |
-| &ensp; ...                                                                     | str   |
-| &ensp; n. component                                                            | str   |
-| Relative abundances of the different components [%] <sup>1</sup>               |       |
-| &ensp; 1. component                                                            | float |
-| &ensp; ...                                                                     | float |
-| &ensp; n. component                                                            | float |
-| Single grain size (1) or grain size distribution (2)                           | int   |
-| Grain size [micron] / Minimum grain size [micron]                              | float |
-| Maximum grain size [micron] <sup>2</sup>                                       | float |
-| Size distribution exponent <sup>2</sup>                                        | float |
-| Number of size bins <sup>2</sup>                                               | int   |
-| Calculate scattering matrix elements (0: no / 1: yes)                          | int   |
-| Number of scattering angles in the interval [0, 180]; odd number! <sup>3</sup> | int   |
-| Project name for the output files                                              | str   |
-| Save results in separate files (0: no / 1: yes)                                | int   |
-
-<sup>1</sup> only for multiple compositions, omit for single composition;
-
-<sup>2</sup> only for a grain size distribution, omit for single grain size;
-
-<sup>3</sup> only if scattering matrix elements are calculated, omit if not.
-
-
-### Run MIEX via streamlit
+### Run MIEX-Python via streamlit
 
 [miex_app.py](miex_app.py) can be used as a simple Streamlit web app: https://miex-python.streamlit.app/.
 
@@ -107,14 +67,13 @@ streamlit run miex_app.py
 ```
 
 
-## Import MIEX
-
-[miex.py](src/miex.py) can be imported and used in any python script (see [jupyter notebook 1](miex_notebook_1.ipynb) or [jupyter notebook 2](miex_notebook_2.ipynb)).
+### Import MIEX-Python
+After installation, MIEX-Python can be imported via `import miex` and used in any python script (see [jupyter notebook 1](miex_notebook_1.ipynb)).
 
 To calculate the efficiency factors and scattering amplitude functions (optionally), use e.g.,
 
 ```python
-result = miex.shexqnn2(x=1.0, m=complex(1.5, 0.0), nang=91, doSA=True)
+result = miex.get_mie_coefficients(x=1.0, m=complex(1.5, 0.0), nang=91, doSA=True)
 ```
 
 | Variable      | Input Parameter                                          | Type            |
@@ -127,31 +86,34 @@ result = miex.shexqnn2(x=1.0, m=complex(1.5, 0.0), nang=91, doSA=True)
 | `eps=1.0e-20` | Accuracy to be achieved                                  | float, optional |
 | `xmin=1.0e-6` | Minimum size parameter                                   | float, optional |
 
-| Variable      | Output Parameter              | Type                | Index |
-| ------------- | ------------------------------| ------------------- | ----- |
-| $Q_{\rm ext}$ | Extinction efficiency         | float               | 0     |
-| $Q_{\rm abs}$ | Absorption efficiency         | float               | 1     |
-| $Q_{\rm sca}$ | Scattering efficiency         | float               | 2     |
-| $Q_{\rm bk}$  | Backscattering efficiency     | float               | 3     |
-| $Q_{\rm pr}$  | Radiation pressure efficiency | float               | 4     |
-| $A$           | Single scattering albedo      | float               | 5     |
-| $g_{\rm sca}$ | Scattering asymmetry factor   | float               | 6     |
-| $S_{1}$       | Scattering amplitude function | complex, array-like | 7     |
-| $S_{2}$       | Scattering amplitude function | complex, array-like | 8     |
+The function returns a dictionary with the following entries:
+
+| Entry         | Output Parameter              | Type                |
+| ------------- | ------------------------------| ------------------- |
+| `Q_ext`       | Extinction efficiency         | float               |
+| `Q_abs`       | Absorption efficiency         | float               |
+| `Q_sca`       | Scattering efficiency         | float               |
+| `Q_bk`        | Backscattering efficiency     | float               |
+| `Q_pr`        | Radiation pressure efficiency | float               |
+| `Albedo`      | Single scattering albedo      | float               |
+| `g_sca`       | Scattering asymmetry factor   | float               |
+| `SA_1`        | Scattering amplitude function | ndarray, complex    |
+| `SA_2`        | Scattering amplitude function | ndarray, complex    |
+| `theta`       | Scattering angles [rad]       | ndarray             |
 
 The scattering amplitude functions are an array with size `2*nang-1`.
 
 To calculate the scattering matrix elements, use
 
 ```python
-sca_mat = miex.scattering_matrix_elements(S1, S2)
+scat_mat = miex.get_scattering_matrix_elements(S1, S2)
 ```
 
 where $S_1$ and $S_2$​ are the scattering amplitude functions.
-The function returns the scattering matrix elements $S_{11}$​, $S_{12}$​, $S_{33}$​, $S_{34}$​ (in this order).
+The function returns a dictionary with the scattering matrix elements $S_{11}$​, $S_{12}$​, $S_{33}$​, $S_{34}$ as entries for instance `scat_mat["S_11"]`.
 
 
-## Test MIEX
+### Test MIEX-Python
 
 [test_miex.py](test_miex.py) includes some test routines. The results are compared with results by [Bohren & Huffman (1998)](https://doi.org/10.1002/9783527618156) and by [Wiscombe (1979)](https://doi.org/10.5065/D6ZP4414):
 
@@ -163,17 +125,13 @@ python3 test_miex.py
 ## Project structure
 
     .
-    ├── ri-data                                  # Input data used by MIEX
+    ├── ri-data                                  # Input data used by MIEX-Python
     ├── README.me
-    ├── example1.input                           # Exemplary input file
-    ├── example2.input                           # Exemplary input file
-    ├── src
-    │   └── miex.py                              # Source code of MIEX
-    ├── miex_app.py                              # Python script to run MIEX via Streamlit
-    ├── miex_notebook_1.ipynb                    # Jupyter notebook on how to use MIEX (basic)
-    ├── miex_notebook_2.ipynb                    # Jupyter notebook on how to use MIEX (advanced)
-    ├── requirements.txt                         # Required python packages for MIEX
-    ├── run_miex.py                              # Python script to run MIEX with input files
+    ├── miex
+    │   └── miex.py                              # Source code of MIEX-Python
+    ├── miex_app.py                              # Python script to run MIEX-Python via Streamlit
+    ├── miex_notebook_1.ipynb                    # Jupyter notebook on how to use MIEX-Python
+    ├── requirements.txt                         # Required python packages for MIEX-Python
     └── test_miex.py                             # Python script for test purposes
 
 

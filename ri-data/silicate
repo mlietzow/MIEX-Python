@@ -1,5 +1,5 @@
-# optical data for astronomical silicate (nlam = 215)
-# (Draine & Lee, 1984, ApJ, 285, 89; Laor & Draine, 1993, ApJ, 402, 441; Weingartner & Draine, 2000, ApJ, 548, 296; Draine, 2003, ApJ, 598, 1017; Draine, 2003, ApJ, 598, 1026)
+# optical data for astronomical silicate
+# Draine & Lee, 1984, ApJ, 285, 89; Laor & Draine, 1993, ApJ, 402, 441; Weingartner & Draine, 2000, ApJ, 548, 296; Draine, 2003, ApJ, 598, 1017; Draine, 2003, ApJ, 598, 1026
 # wavelength [micron]    n    k
 5.166000e-02    8.5730e-01    3.9070e-01
 5.390609e-02    8.5190e-01    4.1670e-01

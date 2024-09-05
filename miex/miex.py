@@ -103,32 +103,32 @@ def shexqnn2(x, ri, nang=2, doSA=False, nterm=2e7, eps=1.0e-20, xmin=1.0e-06):
 
     Returns
     -------
-    0:  Q_ext : float
+    Q_ext : float
         extinction efficiency
 
-    1:  Q_abs : float
+    Q_abs : float
         absorption efficiency
 
-    2:  Q_sca : float
+    Q_sca : float
         scattering efficiency
 
-    3:  Q_bk : float
+    Q_bk : float
         backscattering efficiency
 
-    4:  Q_pr : float
+    Q_pr : float
         radiation pressure efficiency
 
-    5:  albedo : float
+    albedo : float
         single scattering albedo
 
-    6:  g_sca : float
+    g_sca : float
         scattering asymmetry factor
 
-    7:  SA_1 : ndarray
+    SA_1, SA_2 : ndarrays
         scattering amplitude function. The length of the array is 2*nang-1
-
-    8:  SA_2 : ndarray
-        scattering amplitude function. The length of the array is 2*nang-1
+    
+    theta : ndarray
+        scattering angles [rad]
 
     Raises
     ------
@@ -218,10 +218,10 @@ def shexqnn2(x, ri, nang=2, doSA=False, nterm=2e7, eps=1.0e-20, xmin=1.0e-06):
 
     # scattering amplitude functions
     nang2 = 2 * nang - 1
+    mu = np.cos(np.linspace(0, np.pi, nang2))
     SA_1 = np.zeros(nang2, dtype=np.complex128)
     SA_2 = np.zeros(nang2, dtype=np.complex128)
     if doSA:
-        mu = np.cos(np.linspace(0, np.pi, nang2))
         fpi0 = np.zeros(nang2)
         fpi1 = np.ones(nang2)
 
@@ -329,20 +329,103 @@ def shexqnn2(x, ri, nang=2, doSA=False, nterm=2e7, eps=1.0e-20, xmin=1.0e-06):
     return Q_ext, Q_abs, Q_sca, Q_bk, Q_pr, albedo, g_sca, SA_1, SA_2
 
 
-def scattering_matrix_elements(SA_1, SA_2):
+def get_mie_coefficients(x, ri, nang=2, doSA=False, nterm=2e7, eps=1.0e-20, xmin=1.0e-6):
+    """Calculations of the efficiencies and scattering amplitude functions
+
+    Parameters
+    ----------
+    x : float
+        size parameter = 2 * pi * radius / wavelength
+
+    ri : complex float
+        complex refractive index
+
+    nang : int, optional, default = 2
+        half number of scattering angles theta in the intervall 0...pi/2 (equidistantly distributed)
+
+    doSA : bool, optional, default = False
+        calculation of the scattering amplitudes
+
+    nterm : int, optional, default = 2e7
+        Maximum number of terms to be considered
+
+    eps : float, optional, default = 1.0e-20
+        Accuracy to be achieved
+
+    xmin : float, optional, default = 1.0e-06
+        Minimum size parameter
+
+    Returns
+    -------
+    Dictionary with the following entries:
+
+    Q_ext : float
+        extinction efficiency
+
+    Q_abs : float
+        absorption efficiency
+
+    Q_sca : float
+        scattering efficiency
+
+    Q_bk : float
+        backscattering efficiency
+
+    Q_pr : float
+        radiation pressure efficiency
+
+    albedo : float
+        single scattering albedo
+
+    g_sca : float
+        scattering asymmetry factor
+
+    SA_1, SA_2 : ndarrays
+        scattering amplitude function. The length of the array is 2*nang-1
+    
+    theta : ndarray
+        scattering angles [rad]
+    """
+
+    Q_ext, Q_abs, Q_sca, Q_bk, Q_pr, albedo, g_sca, SA_1, SA_2 = shexqnn2(
+        x,
+        ri,
+        nang=nang,
+        doSA=doSA,
+        nterm=nterm,
+        eps=eps,
+        xmin=xmin
+    )
+
+    results = {
+        "Q_ext": Q_ext,
+        "Q_abs": Q_abs,
+        "Q_sca": Q_sca,
+        "Q_bk": Q_bk,
+        "Q_pr": Q_pr,
+        "Albedo": albedo,
+        "g_sca": g_sca,
+        "SA_1": SA_1,
+        "SA_2": SA_2,
+        "theta": np.linspace(0, np.pi, 2 * nang - 1),
+    }
+
+    return results
+
+
+def get_scattering_matrix_elements(SA_1, SA_2):
     """Calculations of the scattering matrix elements
 
     Parameters
     ----------
-    SA_1 : array_like
-        scattering amplitude function
-
-    SA_2 : array_like
+    SA_1, SA_2 : ndarrays
         scattering amplitude function
 
     Returns
     -------
-    S_11, S_12, S_33, S_34 : array_like
+    Dictionary with the following entries:
+
+    S_11, S_12, S_33, S_34 : ndarrays
         scattering matrix elements
     """
 
@@ -361,4 +444,11 @@ def scattering_matrix_elements(SA_1, SA_2):
     S_12[-1] = 0.0
     S_34[-1] = 0.0
 
-    return S_11, S_12, S_33, S_34
+    results = {
+        "S_11": S_11,
+        "S_12": S_12,
+        "S_33": S_33,
+        "S_34": S_34,
+    }
+
+    return results

@@ -1,5 +1,5 @@
-# optical data for graphite, perpendicular (nlam = 215)
-# (Draine & Lee, 1984, ApJ, 285, 89; Laor & Draine, 1993, ApJ, 402, 441; Weingartner & Draine, 2000, ApJ, 548, 296; Draine, 2003, ApJ, 598, 1017; Draine, 2003, ApJ, 598, 1026)
+# optical data for graphite, perpendicular
+# Draine & Lee, 1984, ApJ, 285, 89; Laor & Draine, 1993, ApJ, 402, 441; Weingartner & Draine, 2000, ApJ, 548, 296; Draine, 2003, ApJ, 598, 1017; Draine, 2003, ApJ, 598, 1026
 # wavelength [micron]    n    k
 5.166000e-02    5.4473e-01    4.1306e-01
 5.390609e-02    5.3103e-01    4.8956e-01

@@ -1,4 +1,4 @@
-from src.miex import miex
+import miex.miex
 import numpy as np
 import streamlit as st
 from scipy.interpolate import interp1d
@@ -431,9 +431,7 @@ if run_miex:
 
             try:
                 # derive the scattering parameters
-                q_extx, q_absx, q_scax, q_bkx, q_prx, albedox, g_scax, S1x, S2x = (
-                    miex.shexqnn2(x, ri, nang, doSA, nterm=nterm_mie, eps=eps_mie, xmin=xmin_mie)
-                )
+                miex_res = miex.get_mie_coefficients(x, ri, nang, doSA, nterm=nterm_mie, eps=eps_mie, xmin=xmin_mie)
             except Exception as e:
                 st.error(e)
                 st.stop()
@@ -445,29 +443,29 @@ if run_miex:
             weisum = weisum + weight
 
             wradx = np.pi * (rad * 1.0e-6) ** 2 * weight
-            wqscx = wradx * q_scax
+            wqscx = wradx * miex_res["Q_sca"]
 
             wrad += wradx
             wqsc += wqscx
 
-            c_ext[ilam] += q_extx * wradx
-            c_sca[ilam] += q_scax * wradx
-            c_bk[ilam] += q_bkx * wradx
-            c_abs[ilam] += q_absx * wradx
+            c_ext[ilam] += miex_res["Q_ext"] * wradx
+            c_sca[ilam] += miex_res["Q_sca"] * wradx
+            c_bk[ilam] += miex_res["Q_bk"] * wradx
+            c_abs[ilam] += miex_res["Q_abs"] * wradx
 
-            q_ext[ilam] += q_extx * wradx
-            q_sca[ilam] += q_scax * wradx
-            q_bk[ilam] += q_bkx * wradx
-            q_abs[ilam] += q_absx * wradx
+            q_ext[ilam] += miex_res["Q_ext"] * wradx
+            q_sca[ilam] += miex_res["Q_sca"] * wradx
+            q_bk[ilam] += miex_res["Q_bk"] * wradx
+            q_abs[ilam] += miex_res["Q_abs"] * wradx
 
-            g_sca[ilam] += g_scax * wqscx
+            g_sca[ilam] += miex_res["g_sca"] * wqscx
 
-            S11x, S12x, S33x, S34x = miex.scattering_matrix_elements(S1x, S2x)
+            scat_mat = miex.get_scattering_matrix_elements(miex_res["SA_1"], miex_res["SA_2"])
 
-            S11[:, ilam] += S11x * weight
-            S12[:, ilam] += S12x * weight
-            S33[:, ilam] += S33x * weight
-            S34[:, ilam] += S34x * weight
+            S11[:, ilam] += scat_mat["S_11"] * weight
+            S12[:, ilam] += scat_mat["S_12"] * weight
+            S33[:, ilam] += scat_mat["S_33"] * weight
+            S34[:, ilam] += scat_mat["S_34"] * weight
 
         c_ext[ilam] /= weisum
         c_sca[ilam] /= weisum

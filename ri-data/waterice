@@ -1,5 +1,5 @@
-# optical data for water ice (nlam = 467)
-# (Warren & Brandt, 2008, J. Geophys. Res., 113, D14220)
+# optical data for water ice
+# Warren & Brandt, 2008, J. Geophys. Res., 113, D14220
 # wavelength [micron]    n    k
 5.0600e-02    8.4280e-01    2.5000e-01
 5.1700e-02    8.4830e-01    2.5900e-01
