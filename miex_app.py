@@ -460,7 +460,7 @@ if run_miex:
 
             g_sca[ilam] += miex_res["g_sca"] * wqscx
 
-            scat_mat = miex.get_scattering_matrix_elements(miex_res["SA_1"], miex_res["SA_2"])
+            scat_mat = miex.get_scattering_matrix(miex_res["SA_1"], miex_res["SA_2"])
 
             S11[:, ilam] += scat_mat["S_11"] * weight
             S12[:, ilam] += scat_mat["S_12"] * weight

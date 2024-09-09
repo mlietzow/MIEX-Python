@@ -106,7 +106,7 @@ The scattering amplitude functions are an array with size `2*nang-1`.
 To calculate the scattering matrix elements, use
 
 ```python
-scat_mat = miex.get_scattering_matrix_elements(S1, S2)
+scat_mat = miex.get_scattering_matrix(S1, S2)
 ```
 
 where $S_1$ and $S_2$​ are the scattering amplitude functions.

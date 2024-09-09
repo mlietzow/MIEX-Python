@@ -413,7 +413,7 @@ def get_mie_coefficients(x, ri, nang=2, doSA=False, nterm=2e7, eps=1.0e-20, xmin
     return results
 
 
-def get_scattering_matrix_elements(SA_1, SA_2):
+def get_scattering_matrix(SA_1, SA_2):
     """Calculations of the scattering matrix elements
 
     Parameters

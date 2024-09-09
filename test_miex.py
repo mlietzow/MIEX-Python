@@ -27,7 +27,7 @@ class test_miex(unittest.TestCase):
         self.assertAlmostEqual(result["Q_sca"], 3.10543, msg="incorrect Q_sca", delta=0.00001)
         self.assertAlmostEqual(result["Q_bk"], 2.92534, msg="incorrect Q_bk", delta=0.00001)
 
-        scat_mat = miex.get_scattering_matrix_elements(result["SA_1"], result["SA_2"])
+        scat_mat = miex.get_scattering_matrix(result["SA_1"], result["SA_2"])
         S_11 = scat_mat["S_11"]
         S_12 = -scat_mat["S_12"] / S_11
         S_33 = scat_mat["S_33"] / S_11
@@ -163,7 +163,7 @@ class test_miex(unittest.TestCase):
             result["g_sca"], 0.742913, msg="incorrect g_sca", delta=0.000001
         )
 
-        scat_mat = miex.get_scattering_matrix_elements(result["SA_1"], result["SA_2"])
+        scat_mat = miex.get_scattering_matrix(result["SA_1"], result["SA_2"])
         S_11 = scat_mat["S_11"]
         S_12 = scat_mat["S_12"]
         S_12 /= S_11
@@ -277,7 +277,7 @@ class test_miex(unittest.TestCase):
             result["g_sca"], 0.818246, msg="incorrect g_sca", delta=0.000001
         )
 
-        scat_mat = miex.get_scattering_matrix_elements(result["SA_1"], result["SA_2"])
+        scat_mat = miex.get_scattering_matrix(result["SA_1"], result["SA_2"])
         S_11 = scat_mat["S_11"]
         S_12 = scat_mat["S_12"]
         S_12 /= S_11
@@ -391,7 +391,7 @@ class test_miex(unittest.TestCase):
             result["g_sca"], 0.827882, msg="incorrect g_sca", delta=0.000001
         )
 
-        scat_mat = miex.get_scattering_matrix_elements(result["SA_1"], result["SA_2"])
+        scat_mat = miex.get_scattering_matrix(result["SA_1"], result["SA_2"])
         S_11 = scat_mat["S_11"]
         S_12 = scat_mat["S_12"]
         S_12 /= S_11
@@ -505,7 +505,7 @@ class test_miex(unittest.TestCase):
             result["g_sca"], 0.829592, msg="incorrect g_sca", delta=0.000001
         )
 
-        scat_mat = miex.get_scattering_matrix_elements(result["SA_1"], result["SA_2"])
+        scat_mat = miex.get_scattering_matrix(result["SA_1"], result["SA_2"])
         S_11 = scat_mat["S_11"]
         S_12 = scat_mat["S_12"]
         S_12 /= S_11
@@ -619,7 +619,7 @@ class test_miex(unittest.TestCase):
             result["g_sca"], 0.922350, msg="incorrect g_sca", delta=0.000001
         )
 
-        scat_mat = miex.get_scattering_matrix_elements(result["SA_1"], result["SA_2"])
+        scat_mat = miex.get_scattering_matrix(result["SA_1"], result["SA_2"])
         S_11 = scat_mat["S_11"]
         S_12 = scat_mat["S_12"]
         S_12 /= S_11
@@ -733,7 +733,7 @@ class test_miex(unittest.TestCase):
             result["g_sca"], 0.950392, msg="incorrect g_sca", delta=0.000001
         )
 
-        scat_mat = miex.get_scattering_matrix_elements(result["SA_1"], result["SA_2"])
+        scat_mat = miex.get_scattering_matrix(result["SA_1"], result["SA_2"])
         S_11 = scat_mat["S_11"]
         S_12 = scat_mat["S_12"]
         S_12 /= S_11
@@ -847,7 +847,7 @@ class test_miex(unittest.TestCase):
             result["g_sca"], 0.950880, msg="incorrect g_sca", delta=0.000001
         )
 
-        scat_mat = miex.get_scattering_matrix_elements(result["SA_1"], result["SA_2"])
+        scat_mat = miex.get_scattering_matrix(result["SA_1"], result["SA_2"])
         S_11 = scat_mat["S_11"]
         S_12 = scat_mat["S_12"]
         S_12 /= S_11
@@ -961,7 +961,7 @@ class test_miex(unittest.TestCase):
             result["g_sca"], 0.950650, msg="incorrect g_sca", delta=0.000001
         )
 
-        scat_mat = miex.get_scattering_matrix_elements(result["SA_1"], result["SA_2"])
+        scat_mat = miex.get_scattering_matrix(result["SA_1"], result["SA_2"])
         S_11 = scat_mat["S_11"]
         S_12 = scat_mat["S_12"]
         S_12 /= S_11
