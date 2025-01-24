@@ -3,7 +3,7 @@ pytest:
 
     before_script:
         - python3 --version
-        - pip3 --version  # for debugging
+        - python3 -m venv ./venv && source ./venv/bin/activate
         - pip3 install -r requirements.txt
 
     script:
