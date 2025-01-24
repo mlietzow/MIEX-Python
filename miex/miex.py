@@ -26,7 +26,7 @@ from numba import njit
 #   * Backscattering effiency factor     (Q_bk)  & Backscattering cross section (C_bk)
 #   * Radiation pressure effiency factor (Q_pr)
 #   * Albedo
-#   * Scattering assymetry factor (g)
+#   * Scattering asymmetry factor (g)
 #
 # ____________________________________________________________________________________________________
 # The optical data of the grains have to be provided in files with the following tabular form
